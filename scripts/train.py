@@ -53,7 +53,9 @@ def evaluate_agent(agent, env, num_episodes: int = 5):
         done = False
         
         while not done:
-            action = agent.select_action(state)
+            # Transpose state from (H, W, C) to (C, H, W)
+            state_transposed = np.transpose(state, (2, 0, 1))
+            action = agent.select_action(state_transposed)
             next_state, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
             episode_return += reward
@@ -88,6 +90,11 @@ def train():
     print(f"State shape: {state_shape}")
     print(f"Number of actions: {num_actions}")
     print(f"Device: {DEVICE}")
+    if DEVICE == 'cpu':
+        print("⚠️  WARNING: Training on CPU. This will be SLOW!")
+        print("   For faster training, use a machine with CUDA-capable GPU.")
+    else:
+        print(f"✓ Using GPU: {torch.cuda.get_device_name(0)}")
     
     # Transpose state shape to (C, H, W) for PyTorch
     state_shape_transposed = (state_shape[2], state_shape[0], state_shape[1])
@@ -211,9 +218,10 @@ def train():
             'buffer_size': len(replay_buffer)
         }
         
+        # Always log to CSV (silent)
         logger.log_episode(episode, metrics)
-        logger.print_episode(episode, metrics)
         
+        # Log to TensorBoard (silent)
         if tb_logger:
             tb_logger.log_scalar('train/episode_return', episode_return, episode)
             tb_logger.log_scalar('train/mean_return_10', mean_return_10, episode)
@@ -221,11 +229,13 @@ def train():
             tb_logger.log_scalar('train/episode_length', episode_length, episode)
             tb_logger.log_scalar('train/avg_loss', avg_loss, episode)
         
-        # Evaluation
+        # Evaluation - Print summary only here
         if episode % TRAINING_CONFIG['eval_frequency'] == 0:
-            print("\nEvaluating agent...")
             eval_return = evaluate_agent(agent, eval_env, TRAINING_CONFIG['eval_episodes'])
-            print(f"Evaluation return: {eval_return:.2f}\n")
+            
+            # Single clean summary line
+            print(f"Episode {episode} | Steps: {episode_length} | Score: {episode_return:.1f} | "
+                  f"Total Steps: {total_steps} | Mean(100): {mean_return_100:.1f} | Eval: {eval_return:.1f}")
             
             if tb_logger:
                 tb_logger.log_scalar('eval/mean_return', eval_return, episode)

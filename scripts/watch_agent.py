@@ -45,6 +45,7 @@ def watch_agent(checkpoint_path: str, num_episodes: int = 3, render_mode: str = 
     
     print(f"State shape: {state_shape}")
     print(f"Number of actions: {num_actions}")
+    print(f"Device: {DEVICE}")
     
     # Create agent
     print(f"\nLoading agent from {checkpoint_path}...")

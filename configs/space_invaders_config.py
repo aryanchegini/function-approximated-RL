@@ -49,8 +49,12 @@ LOGGING_CONFIG = {
     'csv_logging': True,  # Use CSV logging
 }
 
-# Device settings
-DEVICE = 'cuda'  # 'cuda' or 'cpu'
+# Device settings - automatically use CPU if CUDA is not available
+try:
+    import torch
+    DEVICE = 'cuda' if torch.cuda.is_available() else 'cpu'
+except ImportError:
+    DEVICE = 'cpu'
 
 # Random seed for reproducibility
 SEED = 42
