@@ -20,7 +20,6 @@ This project includes a **complete Rainbow DQN implementation** with:
 - **[PROJECT_SUMMARY.md](PROJECT_SUMMARY.md)** - Implementation overview
 - **[PIPELINE_OVERVIEW.md](PIPELINE_OVERVIEW.md)** - Architecture diagrams
 - **[FILE_STRUCTURE.md](FILE_STRUCTURE.md)** - Explanation of all files
-- **[QUICKSTART.py](QUICKSTART.py)** - Quick reference
 
 ## 🚀 Quick Start
 
@@ -84,7 +83,3 @@ See **[README_RAINBOW.md](README_RAINBOW.md)** for comprehensive documentation i
 - Customization guide
 - Troubleshooting
 - References to original papers
-
----
-
-**Implementation**: 100% from scratch, production-ready, well-documented 🎮🤖

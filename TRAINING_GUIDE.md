@@ -104,37 +104,6 @@ Then open http://localhost:6006
 - `rainbow_space_invaders_final.pth` - Final model after training
 - `rainbow_space_invaders_ep{N}.pth` - Checkpoints every 100 episodes
 
-## Clean, Minimal Logging
-
-To reduce terminal output clutter:
-- ✅ Single line printed only during evaluation (every 50 episodes)
-- ✅ Shows: episode #, steps, score, total steps, mean(100), eval score
-- ✅ All data still logged to CSV (every episode for detailed analysis)
-- ✅ TensorBoard updated in real-time (if enabled)
-- ✅ No spam - just the essential info at evaluation time
-
-## Training Time Estimates
-
-### On CPU (Your Current Setup)
-- **Per episode**: 5-15 minutes (depends on episode length)
-- **10 episodes**: ~1-2 hours
-- **100 episodes**: ~10-20 hours
-- **1000 episodes**: ~100-200 hours
-
-### On GPU (CUDA)
-- **Per episode**: 30-60 seconds
-- **10 episodes**: ~5-10 minutes
-- **100 episodes**: ~1-2 hours
-- **1000 episodes**: ~8-12 hours
-
-## Tips
-
-1. **Start Small**: Test with 10-20 episodes first to verify everything works
-2. **Monitor Progress**: Check the CSV file periodically
-3. **Interrupt Safely**: Use Ctrl+C - progress is saved
-4. **Resume Training**: Load checkpoint and continue (requires code modification)
-5. **Use GPU**: For full training, use a GPU machine or cloud service
-
 ## Example Training Session
 
 ```bash

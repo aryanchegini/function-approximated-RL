@@ -156,13 +156,3 @@ Keep clipped rewards for training, but log the raw score separately in the `info
 - Learning phase (100-500): Returns 15-60
 - Good performance (500+): Returns 60-150+
 
-### Your Agent's Progress:
-**Return 5.8** means your agent is:
-✅ Learning to interact with the environment
-✅ Getting some positive rewards (killing aliens)
-✅ On track for early training
-✅ Will improve significantly with more episodes
-
-**This is exactly what you should see in early training!** 🎯
-
-Keep training and you'll see those numbers climb to 20, 40, 80, and beyond!
