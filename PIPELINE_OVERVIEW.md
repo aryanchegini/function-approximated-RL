@@ -251,5 +251,3 @@ Environment → Preprocessing → Agent → Action → Environment
 5. Report results
 ```
 
-This pipeline represents a complete, production-ready implementation of 
-Rainbow DQN with all components working together seamlessly!
