@@ -1,4 +1,22 @@
+# Virtual environment
 rl-cw-env/
+venv/
+env/
+.venv/
+
+# Training outputs
 logs/
 models/
-checkpoints/
+checkpoints/*.pth
+checkpoints/*.pt
+
+# Keep README files in checkpoints
+!checkpoints/README.md
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+*.so
