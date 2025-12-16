@@ -1,6 +1,8 @@
 import torch
 import numpy as np
 from collections import deque
+import time
+from datetime import timedelta
 from RainbowAgent import RainbowDQN
 from AtariWrapper import make_atari_env
 from buffers.replay_buffer import PrioritisedReplayBuffer
@@ -29,6 +31,8 @@ def train():
 
     total_steps = 0
     agent.train_mode()
+    
+    training_start_time = time.time()
 
     print(f"Starting training for {TRAINING_CONFIG['num_episodes']} episodes...")
     print(f"Device: {DEVICE}")
@@ -101,13 +105,17 @@ def train():
                 break
 
         # Logging
+        elapsed_time = time.time() - training_start_time
+        time_str = str(timedelta(seconds=int(elapsed_time)))
+        
         print(f"Episode {episode}/{TRAINING_CONFIG['num_episodes']} | "
               f"Steps: {episode_steps} | "
               f"Reward: {episode_reward:.2f} | "
               f"R100 {np.mean(rewards):.1f} | "
               f"Total Steps: {total_steps} | "
-              f" | Avg Loss: {np.mean(batch_losses):.4f} | "
-              f"Episode Loss: {episodic_loss:.4f}"
+              f"Avg Loss: {np.mean(batch_losses):.4f} | "
+              f"Episode Loss: {episodic_loss:.4f} | "
+              f"Time: {time_str}"
               )
         rewards.append(episode_reward)
         losses.append(episodic_loss)
@@ -118,6 +126,11 @@ def train():
             checkpoint_path = f"{LOGGING_CONFIG['checkpoint_dir']}/checkpoint_ep{episode}.pt"
             agent.save(checkpoint_path)
             print(f"Saved checkpoint: {checkpoint_path}") 
+    
+    
+    checkpoint_path = f"{LOGGING_CONFIG['checkpoint_dir']}/checkpoint_ep{episode}.pt"
+    agent.save(checkpoint_path)
+    print(f"Saved checkpoint: {checkpoint_path}") 
 
 
 if __name__ == '__main__':
