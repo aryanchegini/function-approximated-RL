@@ -1,14 +1,15 @@
 """
 Atari Environment Wrappers
-Standard preprocessing for Atari games following DQN/Rainbow papers.
 """
 import gymnasium as gym
+import ale_py
 import numpy as np
 from collections import deque
 import cv2
 
+gym.register_envs(ale_py)
 
-class NoopResetEnv(gym.Wrapper):
+class RandomStartEnv(gym.Wrapper):
     """
     Sample initial states by taking random number of no-ops on reset.
     No-op is assumed to be action 0.
@@ -82,8 +83,7 @@ class FireResetEnv(gym.Wrapper):
 
 class EpisodicLifeEnv(gym.Wrapper):
     """
-    Make end-of-life == end-of-episode, but only reset on true game over.
-    Helps with learning as agent gets faster feedback.
+    Make end-of-life == end-of-episode 
     """
     def __init__(self, env):
         gym.Wrapper.__init__(self, env)
@@ -104,7 +104,6 @@ class EpisodicLifeEnv(gym.Wrapper):
         if self.was_real_done:
             obs, info = self.env.reset(**kwargs)
         else:
-            # No-op step to advance from terminal/lost life state
             obs, _, _, _, info = self.env.step(0)
         self.lives = self.env.unwrapped.ale.lives()
         return obs, info
@@ -118,8 +117,7 @@ class ClipRewardEnv(gym.RewardWrapper):
 
 class WarpFrame(gym.ObservationWrapper):
     """
-    Warp frames to 84x84 as done in the Nature paper and later work.
-    Convert to grayscale.
+    Warp frames to 84x84 and convert to grayscale.
     """
     def __init__(self, env, width=84, height=84, grayscale=True):
         gym.ObservationWrapper.__init__(self, env)
@@ -151,7 +149,6 @@ class WarpFrame(gym.ObservationWrapper):
 class FrameStack(gym.Wrapper):
     """
     Stack k last frames.
-    Returns lazy array, which is much more memory efficient.
     """
     def __init__(self, env, k):
         gym.Wrapper.__init__(self, env)
@@ -181,26 +178,19 @@ class FrameStack(gym.Wrapper):
 
 
 class ScaledFloatFrame(gym.ObservationWrapper):
-    """Normalize observations to [0, 1]."""
+    """Normalise observations to [0, 1]."""
     def observation(self, obs):
         return np.array(obs).astype(np.float32) / 255.0
 
 
 def make_atari_env(env_id: str, render_mode=None):
     """
-    Create Atari environment with standard preprocessing.
-    
-    Args:
-        env_id: Environment ID (e.g., 'ALE/SpaceInvaders-v5')
-        render_mode: Rendering mode ('human', 'rgb_array', or None)
-    
-    Returns:
-        Wrapped Gymnasium environment
+    Creates Atari environment with preprocessing
+    render_mode: ('human', 'rgb_array', or None)
     """
     env = gym.make(env_id, render_mode=render_mode)
-    
-    # Apply wrappers in order
-    env = NoopResetEnv(env, noop_max=30)
+
+    env = RandomStartEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)
     
     # Fire reset for games that need it

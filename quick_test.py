@@ -1,4 +1,9 @@
+import gymnasium as gym
+import ale_py
 from AtariWrapper import make_atari_env
+
+# Register ALE environments
+gym.register_envs(ale_py)
 
 # Create wrapped environment
 print("Creating SpaceInvaders environment...")

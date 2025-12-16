@@ -1,0 +1,37 @@
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environment
+rl-cw-env/
+venv/
+env/
+ENV/
+
+# Model checkpoints
+checkpoints/*.pth
+models/*.pt
+*.pth
+*.pt
+
+# Logs and data
+logs/*.csv
+*.log
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Distribution / packaging
+*.egg-info/
+dist/
+build/
