@@ -11,6 +11,8 @@ ENV_CONFIG = {
 
 # Agent/Network settings
 AGENT_CONFIG = {
+    'input_channels': 4,  # Number of stacked frames (matches frame_stack)
+    'num_actions': 6,  # Number of actions for Space Invaders
     'num_atoms': 51,  # Number of atoms for distributional RL (C51)
     'v_min': -10.0,  # Minimum value for distribution support
     'v_max': 10.0,   # Maximum value for distribution support
@@ -26,6 +28,8 @@ BUFFER_CONFIG = {
     'alpha': 0.6,  # Prioritization exponent (0 = uniform, 1 = full prioritization)
     'beta_start': 0.4,  # Initial importance sampling weight
     'beta_frames': 100000,  # Frames to anneal beta to 1.0
+    'eps': 1e-6,  # Small constant to prevent zero priority
+    'seed': None,  # Random seed for buffer sampling (None = random, or use SEED for reproducibility)
 }
 
 # Training settings
@@ -33,7 +37,7 @@ TRAINING_CONFIG = {
     'batch_size': 32,  # Batch size for training
     'num_episodes': 1000,  # Number of episodes to train
     'max_steps_per_episode': 10000,  # Maximum steps per episode
-    'learning_starts': 10000,  # Start learning after this many steps
+    'learning_starts': 0,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 10,  # Evaluate every N episodes
     'eval_episodes': 5,  # Number of episodes for evaluation
