@@ -35,3 +35,6 @@ Thumbs.db
 *.egg-info/
 dist/
 build/
+
+# Hex server sync folder
+hex/
