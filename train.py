@@ -19,6 +19,8 @@ from configs.SpaceInvadersConfig import (
     SEED
 )
 
+from scripts.evaluation import eval as evaluate_agent
+
 
 def train():
     torch.manual_seed(SEED)
@@ -115,8 +117,6 @@ def train():
 
                     batch_losses = np.append(np.delete(batch_losses, 0), loss)
                     
-
-
             if done:
                 n_step_buffer.clear()
                 break
@@ -152,6 +152,13 @@ def train():
                   f"Avg Loss: {avg_loss:.4f} | "
                   f"Buffer: {len(replay_buffer)} | "
                   f"Time: {time_str}")
+            
+        if episode % TRAINING_CONFIG['eval_frequency'] == 0:
+
+            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(env, agent, SEED, num_episodes=TRAINING_CONFIG['eval_episodes'])
+
+            print(f"\n Eval after {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
+
 
         
         if episode % TRAINING_CONFIG['save_frequency'] == 0 and episode > 0:

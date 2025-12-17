@@ -35,13 +35,13 @@ BUFFER_CONFIG = {
 # Training settings
 TRAINING_CONFIG = {
     'batch_size': 32,  # Batch size for training
-    'num_episodes': 1000,  # Number of episodes to train
+    'num_episodes': 500,  # Number of episodes to train
     'max_steps_per_episode': 10000,  # Maximum steps per episode
     'learning_starts': 0,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 10,  # Evaluate every N episodes
-    'eval_episodes': 5,  # Number of episodes for evaluation
-    'save_frequency': 100,  # Save checkpoint every N episodes
+    'eval_frequency': 100,  # Evaluate every N episodes
+    'eval_episodes': 10,  # Number of episodes for evaluation
+    'save_frequency': 500_000,  # Save checkpoint every N episodes
 }
 
 # Logging settings
