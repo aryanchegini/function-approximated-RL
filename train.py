@@ -175,7 +175,7 @@ def train():
         # Save best model
         if mean_return_100 > best_mean_reward:
             best_mean_reward = mean_return_100
-            best_path = f"{LOGGING_CONFIG['checkpoint_dir']}/best_model.pt"
+            best_path = f"{checkpoint_path}/best_model.pt"
             agent.save(best_path)
             print(f"New best model saved! Mean reward: {best_mean_reward:.2f}")
         
