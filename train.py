@@ -39,6 +39,7 @@ def train():
     from datetime import datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
     log_file = os.path.join(LOGGING_CONFIG['log_dir'], f'rainbow_space_invaders_{timestamp}.csv')
+    eval_log_file = os.path.join(LOGGING_CONFIG['log_dir'], f'evaluation_{timestamp}.csv')
     
     with open(log_file, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -62,6 +63,8 @@ def train():
     losses = []
     rewards = []
     rewards_deque = deque(maxlen=100)
+    best_mean_reward = -float('inf')
+    eval_count = 0
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
         state, info = env.reset()
@@ -154,12 +157,24 @@ def train():
                   f"Time: {time_str}")
             
         if episode % TRAINING_CONFIG['eval_frequency'] == 0:
+            eval_count += 1
+            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(
+                env, agent, SEED, 
+                num_episodes=TRAINING_CONFIG['eval_episodes'],
+                eval_count=eval_count,
+                log_file=eval_log_file
+            )
 
-            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(env, agent, SEED, num_episodes=TRAINING_CONFIG['eval_episodes'])
-
-            print(f"\n Eval after {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
+            print(f"\n Eval #{eval_count} after {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
 
 
+        
+        # Save best model
+        if mean_return_100 > best_mean_reward:
+            best_mean_reward = mean_return_100
+            best_path = f"{LOGGING_CONFIG['checkpoint_dir']}/best_model.pt"
+            agent.save(best_path)
+            print(f"New best model saved! Mean reward: {best_mean_reward:.2f}")
         
         if episode % TRAINING_CONFIG['save_frequency'] == 0 and episode > 0:
             checkpoint_path = f"{LOGGING_CONFIG['checkpoint_dir']}/checkpoint_ep{episode}.pt"

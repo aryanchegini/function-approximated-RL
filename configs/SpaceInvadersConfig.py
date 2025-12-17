@@ -41,7 +41,7 @@ TRAINING_CONFIG = {
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 100,  # Evaluate every N episodes
     'eval_episodes': 10,  # Number of episodes for evaluation
-    'save_frequency': 500_000,  # Save checkpoint every N episodes
+    'save_frequency': 100_000,  # Save checkpoint every N episodes
 }
 
 # Logging settings
