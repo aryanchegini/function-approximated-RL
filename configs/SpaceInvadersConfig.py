@@ -39,7 +39,7 @@ TRAINING_CONFIG = {
     'max_steps_per_episode': 10000,  # Maximum steps per episode
     'learning_starts': 1000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 50_000,  # Evaluate every N episodes
+    'eval_frequency': 1_000,  # Evaluate every N episodes
     'eval_episodes': 100,  # Number of episodes for evaluation
     'save_frequency': 200_000,  # Save checkpoint every N episodes
 }
