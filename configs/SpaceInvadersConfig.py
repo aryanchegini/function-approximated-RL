@@ -24,7 +24,7 @@ AGENT_CONFIG = {
 
 # Replay buffer settings
 BUFFER_CONFIG = {
-    'capacity': 100000,  # Maximum buffer size
+    'capacity': 100_000,  # Maximum buffer size
     'alpha': 0.6,  # Prioritization exponent (0 = uniform, 1 = full prioritization)
     'beta_start': 0.4,  # Initial importance sampling weight
     'beta_frames': 100000,  # Frames to anneal beta to 1.0
@@ -35,19 +35,20 @@ BUFFER_CONFIG = {
 # Training settings
 TRAINING_CONFIG = {
     'batch_size': 32,  # Batch size for training
-    'num_episodes': 500,  # Number of episodes to train
+    'num_episodes': 1_000_000,  # Number of episodes to train
     'max_steps_per_episode': 10000,  # Maximum steps per episode
-    'learning_starts': 0,  # Start learning after this many steps
+    'learning_starts': 1000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 100,  # Evaluate every N episodes
-    'eval_episodes': 10,  # Number of episodes for evaluation
-    'save_frequency': 100_000,  # Save checkpoint every N episodes
+    'eval_frequency': 50_000,  # Evaluate every N episodes
+    'eval_episodes': 100,  # Number of episodes for evaluation
+    'save_frequency': 200_000,  # Save checkpoint every N episodes
 }
 
 # Logging settings
 LOGGING_CONFIG = {
     'log_dir': 'logs',
     'checkpoint_dir': 'checkpoints',
+    'alt_checkpoint_dir': 'vast_ai_checkpoints_and_logs',
     'tensorboard': True,  # Use TensorBoard logging
     'csv_logging': True,  # Use CSV logging
 }

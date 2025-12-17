@@ -22,6 +22,10 @@ from configs.SpaceInvadersConfig import (
 from scripts.evaluation import eval as evaluate_agent
 
 
+checkpoint_path = LOGGING_CONFIG['alt_checkpoint_dir']
+logs_path = LOGGING_CONFIG['alt_checkpoint_dir']
+
+
 def train():
     torch.manual_seed(SEED)
     np.random.seed(SEED)
@@ -34,12 +38,13 @@ def train():
     n_step_buffer = NStepBuffer( n_step=AGENT_CONFIG['n_step'], gamma=AGENT_CONFIG['gamma'] )
 
     # CSV Logging
-    os.makedirs(LOGGING_CONFIG['log_dir'], exist_ok=True)
+    os.makedirs(logs_path, exist_ok=True)
     
     from datetime import datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
-    log_file = os.path.join(LOGGING_CONFIG['log_dir'], f'rainbow_space_invaders_{timestamp}.csv')
-    eval_log_file = os.path.join(LOGGING_CONFIG['log_dir'], f'evaluation_{timestamp}.csv')
+
+    log_file = os.path.join(logs_path, f'rainbow_space_invaders_{timestamp}.csv')
+    eval_log_file = os.path.join(logs_path, f'evaluation_{timestamp}.csv')
     
     with open(log_file, 'w', newline='') as f:
         writer = csv.writer(f)
@@ -55,16 +60,13 @@ def train():
     print(f"Device: {DEVICE}")
     print(f"Logging to: {log_file}")
 
-    # check Architecture size params
-    # make notebook which saves best weights, displays training curves, videos of agent playing etc.
-    # run in vast or hex. 
-    # compare with other rainbow implementations.
-
     losses = []
     rewards = []
     rewards_deque = deque(maxlen=100)
     best_mean_reward = -float('inf')
     eval_count = 0
+
+    
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
         state, info = env.reset()
@@ -165,8 +167,9 @@ def train():
                 log_file=eval_log_file
             )
 
-            print(f"\n Eval #{eval_count} after {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
+            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(env, agent, SEED, num_episodes=TRAINING_CONFIG['eval_episodes'])
 
+            print(f"\n Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
 
         
         # Save best model
@@ -176,17 +179,17 @@ def train():
             agent.save(best_path)
             print(f"New best model saved! Mean reward: {best_mean_reward:.2f}")
         
-        if episode % TRAINING_CONFIG['save_frequency'] == 0 and episode > 0:
-            checkpoint_path = f"{LOGGING_CONFIG['checkpoint_dir']}/checkpoint_ep{episode}.pt"
-            agent.save(checkpoint_path)
-            print(f"Saved checkpoint: {checkpoint_path}") 
-    
 
-    checkpoint_path = f"{LOGGING_CONFIG['checkpoint_dir']}/checkpoint_ep{episode}.pt"
-    agent.save(checkpoint_path)
+        if episode % TRAINING_CONFIG['save_frequency'] == 0 and episode > 0:
+            ep_checkpoint_path = f"{checkpoint_path}/checkpoint_ep{episode}.pt"
+            agent.save(ep_checkpoint_path)
+            print(f"Saved checkpoint: {ep_checkpoint_path}") 
+
+    final_checkpoint_path = f"{checkpoint_path}/checkpoint_ep_final.pt"
+    agent.save(final_checkpoint_path)
     print(f"\n{'='*60}")
     print(f"Training completed!")
-    print(f"Final checkpoint: {checkpoint_path}")
+    print(f"Final checkpoint: {final_checkpoint_path}")
     print(f"Training log: {log_file}")
     print(f"Final performance (last 100 eps): {mean_return_100:.2f}")
     print(f"{'='*60}") 
