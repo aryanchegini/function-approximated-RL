@@ -19,7 +19,8 @@ AGENT_CONFIG = {
     'learning_rate': 6.25e-5,  # Learning rate (Adam)
     'gamma': 0.99,  # Discount factor
     'n_step': 3,  # N-step returns
-    'target_update_freq': 1000,  # Target network update frequency (steps)
+    'target_update_freq': 1000,  # Target network update frequency (steps) 
+    'batch_size': 32,  # Batch size for training
 }
 
 # Replay buffer settings

@@ -11,21 +11,26 @@ from layers.DuelingNets import DuelingNetwork
 from configs.SpaceInvadersConfig import ( AGENT_CONFIG, DEVICE, TRAINING_CONFIG )
 
 class RainbowDQN(nn.Module):
-    def __init__(self):
+    def __init__(self, config = AGENT_CONFIG):
         super(RainbowDQN, self).__init__()
-        
-        self.device = DEVICE
+        try:
+            self.device = DEVICE
 
-        self.output_dims = AGENT_CONFIG['num_actions']
-        self.v_min = AGENT_CONFIG['v_min']
-        self.v_max = AGENT_CONFIG['v_max']
-        self.num_atoms = AGENT_CONFIG['num_atoms']
-        self.batch_size = TRAINING_CONFIG['batch_size']
+            self.output_dims = config['num_actions']
+            self.v_min = config['v_min']
+            self.v_max = config['v_max']
+            self.num_atoms = config['num_atoms']
+            self.batch_size = config['batch_size']
+            
+            # Missing attributes
+            self.gamma = config['gamma']
+            self.n_step = config['n_step']
+            self.target_update_freq = config['target_update_freq']
+            self.config = config
+        except KeyError as e:
+            print(config)
+            raise KeyError(f"Missing configuration key: {e}")
         
-        # Missing attributes
-        self.gamma = AGENT_CONFIG['gamma']
-        self.n_step = AGENT_CONFIG['n_step']
-        self.target_update_freq = AGENT_CONFIG['target_update_freq']
 
         self.feature_extractor = self.create_feature_extractor()
         self.dueling_net = DuelingNetwork(self.feature_size, self.num_atoms, self.batch_size, self.output_dims, self.num_atoms)
@@ -43,11 +48,10 @@ class RainbowDQN(nn.Module):
             copy.deepcopy(self.dueling_net)
         ).to(self.device)
 
-
         self.get_online_q_values = self.online[2].get_q_values
         self.get_target_q_values = self.target[2].get_q_values
 
-        self.optimizer = optim.Adam(self.online.parameters(), lr=AGENT_CONFIG['learning_rate'])
+        self.optimizer = optim.Adam(self.online.parameters(), lr=config['learning_rate'])
 
         self.atoms = torch.linspace(self.v_min, self.v_max, self.num_atoms).to(self.device)
         self.delta_z = (self.v_max - self.v_min) / (self.num_atoms - 1)
@@ -66,7 +70,7 @@ class RainbowDQN(nn.Module):
     def create_feature_extractor(self):
         self.feature_size = 64 * 7 * 7
         return nn.Sequential(
-            nn.Conv2d(AGENT_CONFIG['input_channels'], 32, kernel_size=8, stride=4),  # Input channels need to be specified
+            nn.Conv2d(self.config['input_channels'], 32, kernel_size=8, stride=4),  # Input channels need to be specified
             nn.ReLU(),
             nn.Conv2d(32, 64, kernel_size=4, stride=2),
             nn.ReLU(),
