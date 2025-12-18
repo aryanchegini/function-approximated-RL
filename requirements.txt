@@ -1,0 +1,17 @@
+# Core dependencies
+torch>=2.0.0
+numpy>=1.24.0
+gymnasium[atari]>=0.29.0
+ale-py>=0.8.0
+opencv-python>=4.8.0
+
+# Visualization and logging
+matplotlib>=3.7.0
+pandas>=2.0.0
+tensorboard>=2.14.0
+
+# Optional but recommended
+tqdm>=4.65.0
+
+# For Atari ROMs
+autorom[accept-rom-license]>=0.6.0
