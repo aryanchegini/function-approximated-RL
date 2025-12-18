@@ -11,7 +11,7 @@ warnings.filterwarnings('ignore')
 CSV_PATH = "vast_models/rainbow_space_invaders_20251217_144501.csv"
 
 # Create results directory structure based on CSV filename
-csv_filename = Path(CSV_PATH).stem  # Get filename without extension
+csv_filename = Path(CSV_PATH).stemt
 RESULTS_DIR = os.path.join("results", csv_filename)
 os.makedirs(RESULTS_DIR, exist_ok=True)
 print(f"Results will be saved to: {os.path.abspath(RESULTS_DIR)}/")
