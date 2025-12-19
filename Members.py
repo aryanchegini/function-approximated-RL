@@ -47,6 +47,7 @@ class Member():
 
         self.agent_config = agent_config
         self.unstable_types = unstable_types
+        self.device = device
 
         # Initialize logger
         self.logger = PBTLogger(member_id=id, base_dir=logs_path)
