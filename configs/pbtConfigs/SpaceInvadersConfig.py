@@ -19,13 +19,9 @@ PBT_AGENTS_CONFIG_TYPE = {
         'learning_rate': 'float',
         'gamma': 'float',
         'batch_size': 'int',
-        'per_alpha': 'float',
-        'v_min': 'int',
-        'v_max': 'int',
+        'alpha': 'float',  # PER prioritization exponent
         'sigma': 'float',
         'target_update_freq': 'int',
-        'num_atoms': 'int',
-        'alpha': 'float',
         'beta_start': 'float',
     }
 
@@ -34,26 +30,18 @@ PBT_AGENTS_CONFIG = {
         'learning_rate': 1e-5,
         'gamma': 0.95,
         'batch_size': 32, 
-        'per_alpha': 0.4,
-        'v_min':-100,
-        'v_max':10,
+        'alpha': 0.4,  # PER alpha (prioritization exponent)
         'sigma': 0.1,
         'target_update_freq': 500,
-        'num_atoms': 51,
-        'alpha': 0.4,
         'beta_start': 0.4,
     },
     'upper_bounds':{
         'learning_rate': 1e-3,
         'gamma': 0.999,
         'batch_size': 128,
-        'per_alpha': 0.8,
-        'v_min':-10,
-        'v_max':100,
+        'alpha': 0.8,
         'sigma': 0.5,
         'target_update_freq': 5000,
-        'num_atoms': 101,
-        'alpha': 0.8,
         'beta_start': 0.8,
     }
 }
@@ -62,13 +50,10 @@ PBT_AGENTS_CONFIG = {
 STABLE_AGENT_CONFIG = {
     'input_channels': 4,  # Number of stacked frames (matches frame_stack)
     'num_actions': 6,  # Number of actions for Space Invaders
-    # 'num_atoms': 51,  # Number of atoms for distributional RL (C51)
-    # 'v_min': -10.0,  # Minimum value for distribution support
-    # 'v_max': 10.0,   # Maximum value for distribution support
-    # 'learning_rate': 6.25e-5,  # Learning rate (Adam)
-    # 'gamma': 0.99,  # Discount factor
+    'num_atoms': 51,  # Number of atoms for distributional RL (C51) - FIXED across all agents
+    'v_min': -10.0,  # Minimum value for distribution support - FIXED
+    'v_max': 10.0,   # Maximum value for distribution support - FIXED
     'n_step': 3,  # N-step returns
-    # 'target_update_freq': 1000,  # Target network update frequency (steps)
 }
 
 # Default replay buffer settings
