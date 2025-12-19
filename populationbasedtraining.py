@@ -89,7 +89,7 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
     member = Member(id, device=device)
     member_ckpt_path = os.path.join(member.logger.member_dir, 'checkpoint.pth')
-    members[id] = {'ckpt_path': member_ckpt_path,  'member': member, 'score': member.score}
+    members[id] = {'ckpt_path': member_ckpt_path,  'state_dict': copy.deepcopy(member.agent.state_dict()), 'score': copy.deepcopy(member.score), 'config': copy.deepcopy(member.config)}
     member.agent.train_mode()
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
@@ -186,7 +186,8 @@ def train_member(id, shared_dict, members, checkpoint_manager):
             reward, _, _, _ = member.evaluate(env, shared_dict['eval_seed'], TRAINING_CONFIG['eval_episodes'])
             shared_dict['eval_count'] += 1
 
-            members[id]['score'] = reward
+            members[id] = {'ckpt_path': member_ckpt_path,  'state_dict': copy.deepcopy(member.agent.state_dict()), 'score': copy.deepcopy(member.score), 'config': copy.deepcopy(member.config)}
+
 
             print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{shared_dict} \n")
 
