@@ -260,7 +260,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
                         member_id=member.id,
                         episode=episode,
                         total_steps=total_steps,
-                        score=reward,
+                        score=mean(members[i]['metrics']['rewards_100']),
                         agent=member.agent,
                         config=member.config
                     ):
@@ -274,7 +274,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
                         member_id=best_member_id,
                         episode=episode,
                         total_steps=total_steps,
-                        score=members[best_member_id]['score'],
+                        score=mean_return_100,
                         agent=best_member.agent,
                         config=best_member.config
                     )
