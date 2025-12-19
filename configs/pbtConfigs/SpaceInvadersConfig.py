@@ -10,9 +10,9 @@ ENV_CONFIG = {
 }
 
 PBT_CONFIG = {
-    'population_size': 5,
-    'exploit_fraction': 0.4,
-    'perturb_fraction': 0.3,
+    'population_size': 10,
+    'exploit_fraction': 0.3,
+    'perturb_fraction': 0.2,
 }
 
 PBT_AGENTS_CONFIG_TYPE = {
