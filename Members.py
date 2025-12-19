@@ -40,7 +40,7 @@ logs_path = LOGGING_CONFIG['checkpoint_dir']
 peturb_fraction = PBT_CONFIG['perturb_fraction']
 
 class Member():
-    def __init__(self, id, agent_config = PBT_AGENTS_CONFIG, unstable_types = PBT_AGENTS_CONFIG_TYPE, stable_config = STABLE_AGENT_CONFIG):
+    def __init__(self, id, device = DEVICE, agent_config = PBT_AGENTS_CONFIG, unstable_types = PBT_AGENTS_CONFIG_TYPE, stable_config = STABLE_AGENT_CONFIG):
         self.id = id
         self.score = -float('inf')  # Initialize with worst fitness
         self.config = {}
