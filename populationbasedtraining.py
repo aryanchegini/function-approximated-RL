@@ -89,7 +89,7 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
     member = Member(id, device=device)
     member_ckpt_path = os.path.join(member.logger.member_dir, 'checkpoint.pth')
-    members[id] = {'ckpt_path': member_ckpt_path, 'score': member.score}
+    members[id] = {'ckpt_path': member_ckpt_path,  'member': member, 'score': member.score}
     member.agent.train_mode()
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
