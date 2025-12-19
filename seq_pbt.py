@@ -89,7 +89,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
     # Initializing agents
     n_gpus = torch.cuda.device_count()
     print(f"Number of GPUs available: {n_gpus}")
-    device_id = max(1, n_gpus)
+    device_id = 0  # Always use first GPU
     device = torch.device(f'cuda:{device_id}' if n_gpus > 0 else 'cpu')
     print(f"Training on device: {device}, visible devices: {n_gpus}")
 
