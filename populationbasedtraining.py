@@ -51,6 +51,17 @@ def rank_members(members, agent_id=None):
         return ranked, agent_rank
     return ranked
 
+def load_member_from_checkpoint(member_id, device):
+    """Load a member from checkpoint to use for exploitation"""
+    member = Member(member_id, device=device)
+    ckpt_path = os.path.join(member.logger.member_dir, 'checkpoint.pth')
+    if os.path.exists(ckpt_path):
+        checkpoint = torch.load(ckpt_path, map_location=device)
+        member.agent.load_state_dict(checkpoint['agent_state_dict'])
+        if 'config' in checkpoint:
+            member.config = checkpoint['config']
+    return member
+
 def create_batch_dict(batch, weights):
     return {
             'states': torch.FloatTensor(np.array([exp.state for exp in batch])).permute(0, 3, 1, 2),
@@ -89,7 +100,8 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
     member = Member(id, device=device)
     member_ckpt_path = os.path.join(member.logger.member_dir, 'checkpoint.pth')
-    members[id] = {'ckpt_path': member_ckpt_path,  'state_dict': copy.deepcopy(member.agent.state_dict()), 'score': copy.deepcopy(member.score), 'config': copy.deepcopy(member.config)}
+    # Only store serializable metadata in manager dict - NOT state_dict which contains tensors
+    members[id] = {'ckpt_path': member_ckpt_path, 'score': copy.deepcopy(member.score), 'config': copy.deepcopy(member.config)}
     member.agent.train_mode()
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
@@ -196,7 +208,9 @@ def train_member(id, shared_dict, members, checkpoint_manager):
             if agent_rank >= int(population_size * (1 - exploit_fraction)):
                 better_id, better_data = ranked_members[randint(0, int(population_size * (1 - exploit_fraction)) + 1)]
                 print(f" Agent {member.id} Exploiting member {better_id} with score {better_data['score']:.2f}")
-                member.exploit(better_data['member'], episode=episode, total_steps=total_steps)
+                # Load the better member from checkpoint to exploit
+                better_member = load_member_from_checkpoint(better_id, device)
+                member.exploit(better_member, episode=episode, total_steps=total_steps)
                 member.explore(episode=episode, total_steps=total_steps)
                 print(f" Agent {member.id} New config: {member.config}")
 
