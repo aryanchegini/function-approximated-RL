@@ -123,7 +123,9 @@ class Member():
                         agent_config['upper_bounds'][key]
                     )
         
-        self.agent = RainbowDQN(self.config)
+        for param_group in self.agent.optimizer.param_groups:
+            param_group['lr'] = self.config['learning_rate']
+        
         self.n_step_buffer.gamma = self.config['gamma']
         
         # Log explore event
