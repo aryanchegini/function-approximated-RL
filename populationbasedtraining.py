@@ -64,7 +64,7 @@ def create_batch_dict(batch, weights):
 
 
 def train_member(id, shared_dict, members, checkpoint_manager):
-    torch.manual_seed(SEED)
+    torch.manual_seed(SEED + id)    
     np.random.seed(SEED)
 
     n_gpus = torch.cuda.device_count()
@@ -238,9 +238,7 @@ if __name__ == "__main__":
 
     mp.set_start_method('spawn', force=True)
 
-
-
-    torch.manual_seed(SEED + id)
+ 
     
     checkpoint_manager = GlobalCheckpointManager(
         base_dir=chekcpoint_path,
