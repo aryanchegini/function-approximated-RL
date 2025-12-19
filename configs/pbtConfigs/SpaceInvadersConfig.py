@@ -10,7 +10,7 @@ ENV_CONFIG = {
 }
 
 PBT_CONFIG = {
-    'population_size': 8,
+    'population_size': 4,
     'exploit_fraction': 0.2,
     'perturb_fraction': 0.3,
 }
