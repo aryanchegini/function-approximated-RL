@@ -13,24 +13,19 @@ from configs.SpaceInvadersConfig import ( AGENT_CONFIG, DEVICE, TRAINING_CONFIG 
 class RainbowDQN(nn.Module):
     def __init__(self, config = AGENT_CONFIG):
         super(RainbowDQN, self).__init__()
-        try:
-            self.device = DEVICE
+        self.device = DEVICE
 
-            self.output_dims = config['num_actions']
-            self.v_min = config['v_min']
-            self.v_max = config['v_max']
-            self.num_atoms = config['num_atoms']
-            self.batch_size = config['batch_size']
-            
-            # Missing attributes
-            self.gamma = config['gamma']
-            self.n_step = config['n_step']
-            self.target_update_freq = config['target_update_freq']
-            self.config = config
-        except KeyError as e:
-            print(config)
-            raise KeyError(f"Missing configuration key: {e}")
+        self.output_dims = config['num_actions']
+        self.v_min = config['v_min']
+        self.v_max = config['v_max']
+        self.num_atoms = config['num_atoms']
+        self.batch_size = config['batch_size']
         
+        # Missing attributes
+        self.gamma = config['gamma']
+        self.n_step = config['n_step']
+        self.target_update_freq = config['target_update_freq']
+        self.config = config
 
         self.feature_extractor = self.create_feature_extractor()
         self.dueling_net = DuelingNetwork(self.feature_size, self.num_atoms, self.batch_size, self.output_dims, self.num_atoms)

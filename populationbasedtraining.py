@@ -240,7 +240,7 @@ if __name__ == "__main__":
         shared_dict = manager.dict()
         members = manager.dict()
 
-        population_size = sys.argv[1] if len(sys.argv) > 1 else PBT_CONFIG['population_size']
+        population_size = int(sys.argv[1]) if len(sys.argv) > 1 else PBT_CONFIG['population_size']
 
         shared_dict['eval_seed'] = np.random.randint(0, 10000)
         shared_dict['eval_count'] = 0

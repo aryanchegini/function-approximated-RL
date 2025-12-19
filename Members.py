@@ -76,7 +76,7 @@ class Member():
         self.agent = RainbowDQN(self.config)
 
     def evaluate(self, eval_env, seed, episodes=5):
-        eval_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(self.agent, eval_env, seed, episodes)
+        eval_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(eval_env, self.agent, seed, episodes)
         self.score = eval_reward
         return self.score, eval_actions, eval_rewards_eval, eval_states
 
