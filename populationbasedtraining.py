@@ -193,7 +193,7 @@ def train_member(id, shared_dict, members, checkpoint_manager):
             ranked_members, agent_rank = rank_members(members, id)
 
             if agent_rank >= int(population_size * (1 - exploit_fraction)):
-                better_id, better_data = ranked_members[randint(0, int(population_size * (1 - exploit_fraction)))]
+                better_id, better_data = ranked_members[randint(0, int(population_size * (1 - exploit_fraction)) + 1)]
                 print(f" Agent {member.id} Exploiting member {better_id} with score {better_data['score']:.2f}")
                 member.exploit(better_data['member'], episode=episode, total_steps=total_steps)
                 member.explore(episode=episode, total_steps=total_steps)
