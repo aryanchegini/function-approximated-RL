@@ -67,11 +67,19 @@ def train_member(id, shared_dict, members, checkpoint_manager):
     torch.manual_seed(SEED)
     np.random.seed(SEED)
 
+    n_gpus = torch.cuda.device_count()
+    print(f"Number of GPUs available: {n_gpus}")
+    device_id = id % max(1, n_gpus)
+    device = torch.device(f'cuda:{device_id}' if n_gpus > 0 else 'cpu')
+    torch.cuda.set_device(device)
+
+    print(f"Member {id} using device: {device}, visible devices: {n_gpus}")
+
     total_steps = 0
 
     training_start_time = time.time()
 
-    print(f"Starting training for member {id} for {TRAINING_CONFIG['num_episodes']} \n on Device: {DEVICE} episodes...")
+    print(f"Starting training for member {id} for {TRAINING_CONFIG['num_episodes']} \n on Device: {device} episodes...")
 
     losses = []
     rewards = []
@@ -79,8 +87,9 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
     env = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
 
-    member = Member(id)
-    members[id] = {'member':member, 'score': member.score}
+    member = Member(id, device=device)
+    member_ckpt_path = os.path.join(member.logger.member_dir, 'checkpoint.pth')
+    members[id] = {'ckpt_path': member_ckpt_path, 'score': member.score}
     member.agent.train_mode()
 
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
@@ -97,7 +106,7 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
 
         for _ in range(TRAINING_CONFIG['max_steps_per_episode']):
-            state_tensor = torch.FloatTensor(state).permute(2, 0, 1).unsqueeze(0).to(DEVICE)
+            state_tensor = torch.FloatTensor(state).permute(2, 0, 1).unsqueeze(0).to(device)
 
             member.agent.reset_noise()  # Reset noise for NoisyNets
 
@@ -229,6 +238,10 @@ if __name__ == "__main__":
 
     mp.set_start_method('spawn', force=True)
 
+
+
+    torch.manual_seed(SEED + id)
+    
     checkpoint_manager = GlobalCheckpointManager(
         base_dir=chekcpoint_path,
         num_checkpoints=LOGGING_CONFIG.get('num_checkpoints', 10),

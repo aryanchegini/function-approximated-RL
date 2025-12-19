@@ -11,9 +11,9 @@ from layers.DuelingNets import DuelingNetwork
 from configs.SpaceInvadersConfig import ( AGENT_CONFIG, DEVICE, TRAINING_CONFIG )
 
 class RainbowDQN(nn.Module):
-    def __init__(self, config = AGENT_CONFIG):
+    def __init__(self, config = AGENT_CONFIG, device = DEVICE):
         super(RainbowDQN, self).__init__()
-        self.device = DEVICE
+        self.device = device
 
         self.output_dims = config['num_actions']
         self.v_min = config['v_min']
