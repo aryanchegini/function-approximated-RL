@@ -1,7 +1,6 @@
 import numpy as np
 from typing import NamedTuple, List, Tuple, Optional
 
-
 class Experience(NamedTuple):
     state: np.ndarray
     action: int
@@ -13,18 +12,23 @@ class Experience(NamedTuple):
 class PrioritisedReplayBuffer:
     def __init__(
         self,
-        capacity: int,
-        alpha: float = 0.6,
-        beta_start: float = 0.4,
-        beta_frames: int = 100_000,
-        eps: float = 1e-6,
-        seed: Optional[int] = None,
+        config_dict,
+        alpha: float = None,
+        beta_start: float = None,
+        seed: int = 42,
     ):
-        self.capacity = int(capacity)
-        self.alpha = float(alpha)
-        self.beta_start = float(beta_start)
-        self.beta_frames = int(beta_frames)
-        self.eps = float(eps)
+        
+            
+        self.capacity = int(config_dict['capacity'])
+        self.alpha = float(config_dict['alpha'])
+        self.beta_start = float(config_dict['beta_start'])
+        self.beta_frames = int(config_dict['beta_frames'])
+        self.eps = float(config_dict['eps'])
+
+        if alpha is None:
+            self.alpha = config_dict['alpha']
+        if beta_start is None:
+            self.beta_start = config_dict['beta_start']
 
         self.rng = np.random.default_rng(seed)
 

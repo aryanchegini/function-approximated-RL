@@ -10,7 +10,7 @@ ENV_CONFIG = {
 }
 
 PBT_CONFIG = {
-    'population_size': 2,
+    'population_size': 10,
     'exploit_fraction': 0.2,
     'perturb_fraction': 0.3,
 }
@@ -24,7 +24,9 @@ PBT_AGENTS_CONFIG_TYPE = {
         'v_max': 'int',
         'sigma': 'float',
         'target_update_freq': 'int',
-        'num_atoms': 'int'
+        'num_atoms': 'int',
+        'alpha': 'float',
+        'beta_start': 'float',
     }
 
 PBT_AGENTS_CONFIG = {
@@ -37,7 +39,9 @@ PBT_AGENTS_CONFIG = {
         'v_max':10,
         'sigma': 0.1,
         'target_update_freq': 500,
-        'num_atoms': 51
+        'num_atoms': 51,
+        'alpha': 0.4,
+        'beta_start': 0.4,
     },
     'upper_bounds':{
         'learning_rate': 1e-3,
@@ -48,9 +52,10 @@ PBT_AGENTS_CONFIG = {
         'v_max':100,
         'sigma': 0.5,
         'target_update_freq': 5000,
-        'num_atoms': 101
+        'num_atoms': 101,
+        'alpha': 0.8,
+        'beta_start': 0.8,
     }
-
 }
 
 # Agent/Network settings
@@ -66,7 +71,7 @@ STABLE_AGENT_CONFIG = {
     # 'target_update_freq': 1000,  # Target network update frequency (steps)
 }
 
-# Replay buffer settings
+# Default replay buffer settings
 BUFFER_CONFIG = {
     'capacity': 100_000,  # Maximum buffer size
     'alpha': 0.6,  # Prioritization exponent (0 = uniform, 1 = full prioritization)
@@ -81,6 +86,7 @@ TRAINING_CONFIG = {
     # 'batch_size': 32,  # Batch size for training
     'num_episodes': 1_000,  # Number of episodes to train
     'max_steps_per_episode': 10000,  # Maximum steps per episode
+    'total_training_steps': 10_000_000,  # Total steps for entire training run
     'learning_starts': 0,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 80,  # Evaluate every N episodes
@@ -97,6 +103,11 @@ LOGGING_CONFIG = {
     'alt_checkpoint_dir': 'bpt_checkpoints_and_logs',
     'tensorboard': True,  # Use TensorBoard logging
     'csv_logging': True,  # Use CSV logging
+    'episode_log_frequency': 10,  # Log episodes every N episodes
+    'save_global_best': True,  # Save global best model
+    'save_periodic_checkpoints': True,  # Save periodic checkpoints
+    'num_checkpoints': 10,  # Number of periodic checkpoints
+    'checkpoint_by': 'steps',  # 'steps' or 'episodes'
 }
 
 # Device settings - automatically use CPU if CUDA is not available

@@ -33,7 +33,7 @@ def train():
     env = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
     agent = RainbowDQN()
     
-    replay_buffer = PrioritisedReplayBuffer( capacity=BUFFER_CONFIG['capacity'], alpha=BUFFER_CONFIG['alpha'], beta_start=BUFFER_CONFIG['beta_start'], beta_frames=BUFFER_CONFIG['beta_frames'], eps=BUFFER_CONFIG['eps'], seed=BUFFER_CONFIG['seed'] )
+    replay_buffer = PrioritisedReplayBuffer(capacity=BUFFER_CONFIG['capacity'], alpha=BUFFER_CONFIG['alpha'], beta_start=BUFFER_CONFIG['beta_start'], beta_frames=BUFFER_CONFIG['beta_frames'], eps=BUFFER_CONFIG['eps'], seed=BUFFER_CONFIG['seed'] )
     
     n_step_buffer = NStepBuffer( n_step=AGENT_CONFIG['n_step'], gamma=AGENT_CONFIG['gamma'] )
 
@@ -66,13 +66,11 @@ def train():
     best_mean_reward = -float('inf')
     eval_count = 0
 
-    
-
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
         state, info = env.reset()
         episode_reward = 0
         episode_steps = 0
-        episode_actions = []  
+        episode_actions = []
         n_step_buffer.clear()
 
         episodic_loss = 0
