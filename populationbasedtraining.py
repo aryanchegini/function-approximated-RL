@@ -225,6 +225,9 @@ def train_member(id, shared_dict, members, checkpoint_manager):
 
 if __name__ == "__main__":
     # Initialize global checkpoint manager
+
+    mp.set_start_method('spawn', force=True)
+
     checkpoint_manager = GlobalCheckpointManager(
         base_dir=chekcpoint_path,
         num_checkpoints=LOGGING_CONFIG.get('num_checkpoints', 10),
