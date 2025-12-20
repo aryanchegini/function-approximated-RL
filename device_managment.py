@@ -29,7 +29,9 @@ from Members import Member
 from scripts.evaluation import eval as evaluate_agent
 from logs.pbt_logger import GlobalCheckpointManager
 
-import torch.multiprocessing as mp
+import multiprocessing as mp
+from torch.multiprocessing import Process, Queue, Manager
+
 from logs.pbt_logger import GlobalCheckpointManager
 
 if torch.cuda.is_available() and hasattr(torch, 'set_float32_matmul_precision'):
@@ -311,7 +313,7 @@ if __name__=='__main__':
             print('Only one GPU available, Device:', device)
             print('\n')
 
-        population = {}
+        shared_dict = {}
         eval_data = {}
         eval_data['eval_seed'] = eval_seed
         eval_data['eval_count'] = 0
@@ -323,14 +325,14 @@ if __name__=='__main__':
                 # Allocate each member of population a gpu
             # add a place for an agent, score and device for each member of the population
             
-            population[i] = { 'configs':None, 'state_dict': None, 'score':0, 'device':str(device) }
+            shared_dict[i] = { 'configs':None, 'state_dict': None, 'score':0, 'device':str(device) }
             devices_dict[str(device)]['members'].append(i)
             print(f'Running agent {i} on :{str(device)}')
 
 
         training_thread(0, device, 
                         devices_dict[str(device)]['members'], 
-                        population,
+                        shared_dict,
                         devices, eval_data)
                         
 
@@ -340,9 +342,9 @@ if __name__=='__main__':
 
         mp.set_start_method('spawn', force=True) # Allows multiprocessing
     
-        with mp.Manager() as manager:
+        with Manager() as manager:
 
-            population = manager.dict() 
+            shared_dict = manager.dict() 
             eval_data = {}
             eval_data['eval_seed'] = eval_seed
             eval_data['eval_count'] = 0
@@ -363,18 +365,18 @@ if __name__=='__main__':
                 # Allocate each member of population a gpu
                 device_id = i % n_gpus
                 # add a place for an agent, score and device for each member of the population
-                population[i] = {'configs':None, 'state_dict': None, 'score':0, 'device':f'cuda:{device_id}' }
+                shared_dict[i] = {'configs':None, 'state_dict': None, 'score':0, 'device':f'cuda:{device_id}' }
                 devices_dict[f'cuda:{device_id}']['members'].append(i)
                 print(f'Running agent {i} on gpu:{f'cuda:{device_id}'}')
 
             processes = []
             # Place each process on respective gpus
             for i, gpu in enumerate(gpus):
-                process = mp.Process(target = training_thread,
+                process = Process(target = training_thread,
                 args = (i, 
                         gpus[gpu], 
                         devices_dict[gpu]['members'], 
-                        population,
+                        shared_dict,
                         devices, eval_data
                         ))
                 
