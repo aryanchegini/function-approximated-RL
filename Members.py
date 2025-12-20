@@ -74,28 +74,28 @@ class Member():
 
         self.replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, alpha=self.config['alpha'], beta_start=self.config['beta_start'])
         self.n_step_buffer = NStepBuffer(n_step=self.config['n_step'], gamma=self.config['gamma'])
-        self.agent = RainbowDQN(self.config)
+        self.agent = RainbowDQN(self.config, device=device)
 
     def evaluate(self, eval_env, seed, episodes=5):
         eval_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(eval_env, self.agent, seed, episodes)
         self.score = eval_reward
         return self.score, eval_actions, eval_rewards_eval, eval_states
 
-    def exploit(self, better_member, episode=0, total_steps=0):
+    def exploit(self, better_config, better_params, better_id, episode=0, total_steps=0):
         """Copy config and weights from better performing member"""
         old_config = copy.deepcopy(self.config)
         
-        self.config = copy.deepcopy(better_member.config)
-        self.agent = RainbowDQN(self.config)
-        self.agent.load_state_dict(better_member.agent.state_dict())
-        self.replay_buffer = copy.deepcopy(better_member.replay_buffer)
-        self.n_step_buffer = copy.deepcopy(better_member.n_step_buffer)
+        self.config = copy.deepcopy(better_config)
+        self.agent = RainbowDQN(self.config, self.device)
+        self.agent.load_state_dict(better_params)
+        self.replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, alpha=self.config['alpha'], beta_start=self.config['beta_start'])
+        self.n_step_buffer = NStepBuffer(n_step=self.config['n_step'], gamma=self.config['gamma'])
         
         # Log exploit event
         self.logger.log_exploit(
-            source_member=better_member.id,
+            source_member=better_id,
             episode=episode,
-            total_steps=total_steps,
+            total_steps=self.agent.learn_step_counter,
             old_config=old_config,
             new_config=self.config
         )
@@ -122,14 +122,15 @@ class Member():
                         agent_config['lower_bounds'][key],
                         agent_config['upper_bounds'][key]
                     )
-        
-        self.agent = RainbowDQN(self.config)
+        state_dict = self.agent.state_dict()
+        self.agent = RainbowDQN(self.config, self.device)
         self.n_step_buffer.gamma = self.config['gamma']
+        self.agent.load_state_dict(state_dict)
         
         # Log explore event
         self.logger.log_explore(
             episode=episode,
-            total_steps=total_steps,
+            total_steps=self.agent.learn_step_counter,
             old_config=old_config,
             new_config=self.config
         )

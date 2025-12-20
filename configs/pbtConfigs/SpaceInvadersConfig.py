@@ -11,7 +11,7 @@ ENV_CONFIG = {
 
 PBT_CONFIG = {
     'population_size': 10,
-    'exploit_fraction': 0.3,
+    'exploit_fraction': 0.4,
     'perturb_fraction': 0.2,
 }
 
@@ -20,11 +20,8 @@ PBT_AGENTS_CONFIG_TYPE = {
         'gamma': 'float',
         'batch_size': 'int',
         'per_alpha': 'float',
-        'v_min': 'int',
-        'v_max': 'int',
         'sigma': 'float',
         'target_update_freq': 'int',
-        'num_atoms': 'int',
         'alpha': 'float',
         'beta_start': 'float',
     }
@@ -35,11 +32,8 @@ PBT_AGENTS_CONFIG = {
         'gamma': 0.95,
         'batch_size': 32, 
         'per_alpha': 0.4,
-        'v_min':-100,
-        'v_max':10,
         'sigma': 0.1,
         'target_update_freq': 500,
-        'num_atoms': 51,
         'alpha': 0.4,
         'beta_start': 0.4,
     },
@@ -48,11 +42,8 @@ PBT_AGENTS_CONFIG = {
         'gamma': 0.999,
         'batch_size': 128,
         'per_alpha': 0.8,
-        'v_min':-10,
-        'v_max':100,
         'sigma': 0.5,
         'target_update_freq': 5000,
-        'num_atoms': 101,
         'alpha': 0.8,
         'beta_start': 0.8,
     }
@@ -62,9 +53,10 @@ PBT_AGENTS_CONFIG = {
 STABLE_AGENT_CONFIG = {
     'input_channels': 4,  # Number of stacked frames (matches frame_stack)
     'num_actions': 6,  # Number of actions for Space Invaders
+    'num_atoms': 51,
     # 'num_atoms': 51,  # Number of atoms for distributional RL (C51)
-    # 'v_min': -10.0,  # Minimum value for distribution support
-    # 'v_max': 10.0,   # Maximum value for distribution support
+    'v_min': -10.0,  # Minimum value for distribution support
+    'v_max': 10.0,   # Maximum value for distribution support
     # 'learning_rate': 6.25e-5,  # Learning rate (Adam)
     # 'gamma': 0.99,  # Discount factor
     'n_step': 3,  # N-step returns
@@ -81,16 +73,32 @@ BUFFER_CONFIG = {
     'seed': None,  # Random seed for buffer sampling (None = random, or use SEED for reproducibility)
 }
 
+# # Training settings
+# TRAINING_CONFIG = {
+#     # 'batch_size': 32,  # Batch size for training
+#     'num_episodes': 100_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
+#     'max_steps_per_episode': 120_000,  # Maximum steps per episode
+#     'total_training_steps': 1000_000_000,  # Total steps for entire training run
+#     'learning_starts': 1000,  # Start learning after this many steps
+#     'train_frequency': 4,  # Train every N steps
+#     'eval_frequency': 40,  # Evaluate every N episodes
+#     'eval_episodes': 10,  # Number of episodes for evaluation
+#     'save_frequency': 5_000,  # Save checkpoint every N episodes
+#     'eval_seed': 50,  # Seed for evaluation environment
+#     'change_seed_every': 40  # Change evaluation seed every N evaluations
+# }
+
+
 # Training settings
 TRAINING_CONFIG = {
     # 'batch_size': 32,  # Batch size for training
     'num_episodes': 100_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
     'max_steps_per_episode': 120_000,  # Maximum steps per episode
     'total_training_steps': 1000_000_000,  # Total steps for entire training run
-    'learning_starts': 1000,  # Start learning after this many steps
+    'learning_starts': 0,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 40,  # Evaluate every N episodes
-    'eval_episodes': 10,  # Number of episodes for evaluation
+    'eval_frequency': 5,  # Evaluate every N episodes
+    'eval_episodes': 5,  # Number of episodes for evaluation
     'save_frequency': 5_000,  # Save checkpoint every N episodes
     'eval_seed': 50,  # Seed for evaluation environment
     'change_seed_every': 40  # Change evaluation seed every N evaluations

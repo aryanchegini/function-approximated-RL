@@ -36,12 +36,16 @@ class RainbowDQN(nn.Module):
             self.dueling_net
         ).to(self.device)
 
+        #torch.compile(self.online)
+
         # Create a target network
         self.target = nn.Sequential(
             copy.deepcopy(self.feature_extractor),
             copy.deepcopy(nn.Flatten()),
             copy.deepcopy(self.dueling_net)
         ).to(self.device)
+
+        #torch.compile(self.target)
 
         self.get_online_q_values = self.online[2].get_q_values
         self.get_target_q_values = self.target[2].get_q_values

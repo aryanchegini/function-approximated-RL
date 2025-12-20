@@ -68,7 +68,6 @@ def train_member(id, shared_dict, members, checkpoint_manager):
     np.random.seed(SEED)
 
     n_gpus = torch.cuda.device_count()
-    print(f"Number of GPUs available: {n_gpus}")
     device_id = id % max(1, n_gpus)
     device = torch.device(f'cuda:{device_id}' if n_gpus > 0 else 'cpu')
     torch.cuda.set_device(device)
@@ -240,8 +239,6 @@ if __name__ == "__main__":
 
     mp.set_start_method('spawn', force=True)
 
- 
-    
     checkpoint_manager = GlobalCheckpointManager(
         base_dir=chekcpoint_path,
         num_checkpoints=LOGGING_CONFIG.get('num_checkpoints', 10),
