@@ -116,7 +116,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
         enviroments[i] = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
         member.agent.train_mode()
 
-        metrics[i] = {'episodes':0, 'reward':0, 'loss':0, 'total_steps':0, 'eval_count':0,
+        metrics[i] = {'episodes':0, 'reward':0, 'loss':0, 'total_steps':0,
                        'rewards_100': deque(maxlen=100), 'rewards_10':deque(maxlen=10)}
 
     training_start_time = time.time()
@@ -126,9 +126,8 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
         
         for i in thread_population:
-            
+
             total_steps = metrics[i]['total_steps']
-            eval_count = metrics[i]['eval_count']
             env = enviroments[i]
             state, info = env.reset()
             member = thread_members[i]
@@ -152,7 +151,8 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 done = terminated or truncated
                 episode_reward += reward
                 episode_steps += 1
-                total_steps += 1         
+                metrics[i]['total_steps'] += 1
+                total_steps += 1
 
                 n_step_transition = member.n_step_buffer.add(state, action, reward, next_state, done)
                 
@@ -216,12 +216,12 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 )
 
             if episode % TRAINING_CONFIG['eval_frequency'] == 0:
-                eval_count += 1
-                reward, _, _, _ = member.evaluate(env, eval_seed, TRAINING_CONFIG['eval_episodes'])
+                eval_data['eval_count'] += 1
+                reward, _, _, _ = member.evaluate(env, eval_data['eval_seed'], TRAINING_CONFIG['eval_episodes'])
                 
                 shared_dict[i]['score'] = reward
 
-                print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_seed} \n")
+                print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_data['eval_seed']} \n")
 
                 ranked_members, agent_rank = rank_members(shared_dict, i)
                 total_size = len(ranked_members)
@@ -246,9 +246,9 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config)
 
 
-                if eval_count % TRAINING_CONFIG['change_seed_every'] == 0:
-                    eval_seed += 1
-                    print(f" Agent {member.id} Changing eval seed to {eval_count}")
+                if eval_data['eval_count'] % TRAINING_CONFIG['change_seed_every'] == 0:
+                    eval_data['eval_seed'] += 1
+                    print(f" Agent {member.id} Changing eval seed to {eval_data['eval_count']}")
 
                 if agent_rank == 0:
                     print(f" Agent {member.id} is the best member!")
@@ -277,6 +277,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                         )
                         print(f" Saved periodic checkpoint at {total_steps} steps (best: member {i})")
             
+
 
 if __name__=='__main__':
 
