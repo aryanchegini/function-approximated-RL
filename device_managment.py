@@ -73,10 +73,11 @@ def get_from_shared_dict(dict):
 
     pass
 
-def add_to_shared_dict(i, shared_dict, state_dict, config):
+def add_to_shared_dict(i, shared_dict, state_dict, config, score):
 
     shared_dict[i]['configs'] = config
     shared_dict[i]['state_dict'] = {k: v.cpu() for k, v in state_dict.items()}
+    shared_dict[i]['score'] = score
 
     return shared_dict
 
@@ -230,12 +231,12 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                     # print('ranks:',agent_rank)
 
                     better_id =  ranked_members[randint(0, int(total_size * (1 - exploit_fraction)) + 1)][0]
-                    score = ranked_members[better_id][1]['score']
+                    best_score = ranked_members[better_id][1]['score']
                     
                     better_config = copy.deepcopy(shared_dict[better_id]['configs'])
                     better_params = state_dict_to_device(shared_dict[better_id]['state_dict'], device)
 
-                    print(f" Agent {member.id} Exploiting member {better_id} with score {score:.2f}")
+                    print(f" Agent {member.id} Exploiting member {better_id} with score {best_score:.2f}")
                     print(f"old config: {member.config}")
 
                     member.exploit(better_config, better_params, better_id, episode=episode)
@@ -243,8 +244,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                     print(f'new config:{member.config}')
 
-                shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config)
-
+                shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config, reward)
 
                 if eval_data['eval_count'] % TRAINING_CONFIG['change_seed_every'] == 0:
                     eval_data['eval_seed'] += 1
@@ -252,6 +252,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                 if agent_rank == 0:
                     print(f" Agent {member.id} is the best member!")
+                    print(shared_dict)
 
                     # Update global best
                     if checkpoint_manager.update_best(
