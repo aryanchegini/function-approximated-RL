@@ -10,9 +10,9 @@ ENV_CONFIG = {
 }
 
 PBT_CONFIG = {
-    'population_size': 10,
+    'population_size': 8,
     'exploit_fraction': 0.4,
-    'perturb_fraction': 0.2,
+    'perturb_fraction': 0.3,
 }
 
 PBT_AGENTS_CONFIG_TYPE = {
@@ -69,10 +69,10 @@ BUFFER_CONFIG = {
 # Training settings
 TRAINING_CONFIG = {
     # 'batch_size': 32,  # Batch size for training
-    'num_episodes': 100_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
+    'num_episodes': 80_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
     'max_steps_per_episode': 120_000,  # Maximum steps per episode
     'total_training_steps': 1000_000_000,  # Total steps for entire training run
-    'learning_starts': 1000,  # Start learning after this many steps
+    'learning_starts': 100,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 40,  # Evaluate every N episodes
     'eval_episodes': 10,  # Number of episodes for evaluation
