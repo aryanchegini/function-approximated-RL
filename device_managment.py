@@ -79,10 +79,10 @@ def add_to_shared_dict(i, shared_dict, state_dict, config, score, device):
 
     state = {k: v.cpu() for k, v in state_dict.items()}
     temp = {'configs':config, 'state_dict': state, 'score':score, 'device': device}
-    shared_dict[i] = 
-    shared_dict[i]['configs'] = config
-    shared_dict[i]['state_dict'] = {k: v.cpu() for k, v in state_dict.items()}
-    shared_dict[i]['score'] = score
+    shared_dict[i] = temp
+    # shared_dict[i]['configs'] = config
+    # shared_dict[i]['state_dict'] = {k: v.cpu() for k, v in state_dict.items()}
+    # shared_dict[i]['score'] = score
 
     return shared_dict
 
