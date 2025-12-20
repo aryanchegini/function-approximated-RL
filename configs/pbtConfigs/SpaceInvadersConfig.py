@@ -69,14 +69,14 @@ BUFFER_CONFIG = {
 # Training settings
 TRAINING_CONFIG = {
     # 'batch_size': 32,  # Batch size for training
-    'num_episodes': 100_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
-    'max_steps_per_episode': 120_000,  # Maximum steps per episode
-    'total_training_steps': 1000_000_000,  # Total steps for entire training run
+    'num_episodes': 30_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
+    'max_steps_per_episode': 4_000,  # Maximum steps per episode
+    'total_training_steps': 10_000_000,  # Total steps for entire training run
     'learning_starts': 1000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 40,  # Evaluate every N episodes
     'eval_episodes': 10,  # Number of episodes for evaluation
-    'save_frequency': 5_000,  # Save checkpoint every N episodes
+    'save_frequency': 500,  # Save checkpoint every N episodes // not used
     'eval_seed': 50,  # Seed for evaluation environment
     'change_seed_every': 40  # Change evaluation seed every N evaluations
 }
@@ -91,7 +91,7 @@ LOGGING_CONFIG = {
     'episode_log_frequency': 10,  # Log episodes every N episodes
     'save_global_best': True,  # Save global best model
     'save_periodic_checkpoints': True,  # Save periodic checkpoints
-    'num_checkpoints': 20,  # Number of periodic checkpoints
+    'num_checkpoints': 30,
     'checkpoint_by': 'episodes',  # 'steps' or 'episodes'
     'console_every':5
 }
