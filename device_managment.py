@@ -62,7 +62,7 @@ def rank_members(shared_dict, agent_id):
     
     ranked = sorted(shared_dict.items(), key = lambda item: item[1]['score'], reverse=True)
 
-    if ranked[0][1]['score']>0:
+    if ranked[0][1]['score'] > 0:
         agent_rank = next((i for i, (mid, _) in enumerate(ranked) if mid == agent_id), -1)
     else:
         agent_rank = 0
@@ -75,8 +75,11 @@ def get_from_shared_dict(dict):
 
     pass
 
-def add_to_shared_dict(i, shared_dict, state_dict, config, score):
+def add_to_shared_dict(i, shared_dict, state_dict, config, score, device):
 
+    state = {k: v.cpu() for k, v in state_dict.items()}
+    temp = {'configs':config, 'state_dict': state, 'score':score, 'device': device}
+    shared_dict[i] = 
     shared_dict[i]['configs'] = config
     shared_dict[i]['state_dict'] = {k: v.cpu() for k, v in state_dict.items()}
     shared_dict[i]['score'] = score
@@ -112,8 +115,10 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
         member = Member(i, device)
     #    print(member.agent.state_dict())
         #Need to run checks on Member
-        shared_dict[i]['configs'] = member.config
-        shared_dict[i]['state_dict'] = state_dict_to_device(member.agent.state_dict(), torch.device('cpu'))
+        temp = shared_dict[i]
+        temp['configs'] = member.config
+        temp['state_dict'] = state_dict_to_device(member.agent.state_dict(), torch.device('cpu'))
+        shared_dict[i] = temp
 
         thread_members[i] = member
         enviroments[i] = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
@@ -222,7 +227,9 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 eval_data['eval_count'] += 1
                 reward, _, _, _ = member.evaluate(env, eval_data['eval_seed'], TRAINING_CONFIG['eval_episodes'])
                 
-                shared_dict[i]['score'] = reward
+                temp_member = shared_dict[i]
+                temp_member['score'] = reward 
+                shared_dict[i] = temp_member
 
                 print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_data['eval_seed']} \n")
 
@@ -246,7 +253,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                     print(f'new config:{member.config}')
 
-                shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config, reward)
+                shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config, reward, device)
 
                 if eval_data['eval_count'] % TRAINING_CONFIG['change_seed_every'] == 0:
                     eval_data['eval_seed'] += 1
