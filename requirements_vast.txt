@@ -1,8 +1,8 @@
 # Core dependencies
-numpy>=1.24.0
+numpy<2.0.0  
 gymnasium[atari]>=0.29.0
 ale-py>=0.8.0
-opencv-python>=4.8.0
+opencv-python-headless>=4.8.0 
 
 # Visualization and logging
 matplotlib>=3.7.0
@@ -14,3 +14,4 @@ tqdm>=4.65.0
 
 # For Atari ROMs
 autorom[accept-rom-license]>=0.6.0
+torch>=2.0.0

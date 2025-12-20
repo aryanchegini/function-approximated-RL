@@ -44,6 +44,7 @@ class Member():
         self.id = id
         self.score = -float('inf')  # Initialize with worst fitness
         self.config = {}
+        self.member_steps = 0  # Track steps for this member only
 
         self.agent_config = agent_config
         self.unstable_types = unstable_types
@@ -122,8 +123,13 @@ class Member():
                         agent_config['lower_bounds'][key],
                         agent_config['upper_bounds'][key]
                     )
+
         state_dict = self.agent.state_dict()
         self.agent = RainbowDQN(self.config, self.device)
+
+        # for param_group in self.agent.optimizer.param_groups:
+        #     param_group['lr'] = self.config['learning_rate']
+
         self.n_step_buffer.gamma = self.config['gamma']
         self.agent.load_state_dict(state_dict)
         
