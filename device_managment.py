@@ -336,7 +336,7 @@ if __name__=='__main__':
 
         
 
-        mp.set_start_mathod('spawn', force=True) # Allows multiprocessing
+        mp.set_start_method('spawn', force=True) # Allows multiprocessing
     
         with mp.Manager() as manager:
 
