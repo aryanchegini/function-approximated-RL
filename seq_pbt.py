@@ -159,9 +159,10 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
                 episode_reward += reward
                 episode_steps += 1
                 total_steps += 1
+                member.member_steps += 1  # Increment per-member step counter
 
                 
-                n_step_transition = member.n_step_buffer.add(state, action, reward, next_state, done)
+                n_step_transition = member.n_step_buffer.add(state, action, reward, done)
                 
                 if n_step_transition:
                     s, a, r, s_next, d = n_step_transition
@@ -198,7 +199,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
             if episode % LOGGING_CONFIG['episode_log_frequency'] == 0:
                 member.logger.log_episode(
                     episode=episode,
-                    total_steps=total_steps,
+                    total_steps=member.member_steps,  # Use per-member steps
                     episode_return=episode_reward,
                     episode_length=episode_steps,
                     mean_return_10=mean_return_10,
@@ -218,7 +219,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
                     episode_steps=episode_steps,
                     episode_reward=episode_reward,
                     mean_return_100=mean_return_100,
-                    total_steps=total_steps,
+                    total_steps=member.member_steps,  # Use per-member steps
                     avg_loss=avg_loss,
                     buffer_size=len(member.replay_buffer),
                     time_str=time_str
@@ -231,7 +232,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
 
                 members[i]['score'] = reward
 
-                print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_seed} \n")
+                print(f" Agent {member.id} Eval after {episode} episodes, {member.member_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_seed} \n")
 
                 ranked_members, agent_rank = rank_members(members, i)
                 
