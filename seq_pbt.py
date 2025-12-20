@@ -162,7 +162,7 @@ def train_sequentially(population_size = PBT_CONFIG['population_size']):
                 member.member_steps += 1  # Increment per-member step counter
 
                 
-                n_step_transition = member.n_step_buffer.add(state, action, reward, done)
+                n_step_transition = member.n_step_buffer.add(state, action, reward, next_state, done)
                 
                 if n_step_transition:
                     s, a, r, s_next, d = n_step_transition
