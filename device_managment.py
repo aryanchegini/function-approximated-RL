@@ -343,7 +343,7 @@ if __name__=='__main__':
         with mp.Manager() as manager:
 
             population = manager.dict() 
-            eval_data = manager.dict()
+            eval_data = {}
             eval_data['eval_seed'] = eval_seed
             eval_data['eval_count'] = 0
             # A shared dictionary containing a dict of members, 
