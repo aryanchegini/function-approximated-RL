@@ -74,7 +74,7 @@ TRAINING_CONFIG = {
     'total_training_steps': 1000_000_000,  # Total steps for entire training run
     'learning_starts': 100,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 40,  # Evaluate every N episodes
+    'eval_frequency': 20,  # Evaluate every N episodes
     'eval_episodes': 10,  # Number of episodes for evaluation
     'save_frequency': 5_000,  # Save checkpoint every N episodes
     'eval_seed': 50,  # Seed for evaluation environment

@@ -262,8 +262,8 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                         agent=member.agent,
                         config=member.config
                     ):
-                        best_mean_reward = reward
-                        print(f" Agent {member.id} New global best model saved! Score: {reward:.2f}")
+                        best_mean_reward = mean_return_100
+                        print(f" Agent {member.id} New global best model saved! Score: {mean_return_100:.2f}")
 
                     if checkpoint_manager.should_save_checkpoint(total_steps):
                         
