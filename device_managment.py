@@ -334,10 +334,7 @@ if __name__=='__main__':
 
     elif len(gpus) >= 1:
 
-        print('Available gpus:')
-        for i, device in enumerate(gpus):
-            print(f'Device {i}, name:{device}, and instance: {devices[str(device)]}')
-        print('\n')
+        
 
         mp.set_start_mathod('spawn', force=True) # Allows multiprocessing
     
@@ -352,6 +349,11 @@ if __name__=='__main__':
 
             devices_dict = { device:{'members':[], '.device':gpus[str(device)] } for device in gpus.keys() }
             # A dict (this doesnt change) of devices, the members on a device and device instance
+
+            print('Available gpus:')
+            for i, device in enumerate(gpus):
+                print(f'Device {i}, name:{device}, and instance: {devices_dict[str(device)]}')
+            print('\n')
 
             n_gpus = len(gpus)
 
