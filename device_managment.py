@@ -336,7 +336,7 @@ if __name__=='__main__':
 
         print('Available gpus:')
         for i, device in enumerate(gpus):
-            print(f'Device {i}, name:{device}, and instance: {devices[device]}')
+            print(f'Device {i}, name:{device}, and instance: {devices[str(device)]}')
         print('\n')
 
         mp.set_start_mathod('spawn', force=True) # Allows multiprocessing
@@ -350,7 +350,7 @@ if __name__=='__main__':
             # A shared dictionary containing a dict of members, 
             # each member has an agent, score and device
 
-            devices_dict = { device:{'members':[], '.device':gpus[device] } for device in gpus.keys() }
+            devices_dict = { device:{'members':[], '.device':gpus[str(device)] } for device in gpus.keys() }
             # A dict (this doesnt change) of devices, the members on a device and device instance
 
             n_gpus = len(gpus)
