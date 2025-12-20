@@ -22,7 +22,6 @@ PBT_AGENTS_CONFIG_TYPE = {
         'alpha': 'float',  # PER prioritization exponent
         'sigma': 'float',
         'target_update_freq': 'int',
->>>>>>> ad1f8ebc4c9eb60a99b2c04589c86ad01d81973e
         'beta_start': 'float',
     }
 
