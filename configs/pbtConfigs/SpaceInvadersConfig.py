@@ -10,9 +10,9 @@ ENV_CONFIG = {
 }
 
 PBT_CONFIG = {
-    'population_size': 8,
+    'population_size': 4,
     'exploit_fraction': 0.4,
-    'perturb_fraction': 0.3,
+    'perturb_fraction': 0.4,
 }
 
 PBT_AGENTS_CONFIG_TYPE = {
@@ -32,16 +32,16 @@ PBT_AGENTS_CONFIG = {
         'batch_size': 32, 
         'alpha': 0.4,  # PER alpha (prioritization exponent)
         'sigma': 0.1,
-        'target_update_freq': 500,
+        'target_update_freq': 1000,
         'beta_start': 0.4,
     },
     'upper_bounds':{
         'learning_rate': 1e-3,
-        'gamma': 0.999,
+        'gamma': 0.99999,
         'batch_size': 128,
         'alpha': 0.8,
         'sigma': 0.5,
-        'target_update_freq': 5000,
+        'target_update_freq': 10_000,
         'beta_start': 0.8,
     }
 }
@@ -71,8 +71,8 @@ TRAINING_CONFIG = {
     # 'batch_size': 32,  # Batch size for training
     'num_episodes': 80_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
     'max_steps_per_episode': 120_000,  # Maximum steps per episode
-    'total_training_steps': 1000_000_000,  # Total steps for entire training run
-    'learning_starts': 1_000,  # Start learning after this many steps
+    'total_training_steps': 10_000_000,  # Total steps for entire training run
+    'learning_starts': 50_000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
     'eval_frequency': 20,  # Evaluate every N episodes
     'eval_episodes': 2,  # Number of episodes for evaluation
@@ -94,7 +94,7 @@ LOGGING_CONFIG = {
     'save_periodic_checkpoints': True,  # Save periodic checkpoints
     'num_checkpoints': 30,
     'checkpoint_by': 'episodes',  # 'steps' or 'episodes'
-    'console_every':5
+    'console_every':20
 }
 
 # Device settings - automatically use CPU if CUDA is not available
