@@ -223,7 +223,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                     time_str=time_str
                 )
 
-            if episode % TRAINING_CONFIG['eval_frequency'] == 0:
+            if episode % TRAINING_CONFIG['eval_frequency'] == 0 and total_steps > TRAINING_CONFIG['learning_starts']:
                 eval_data['eval_count'] += 1
                 reward, _, _, _ = member.evaluate(env, eval_data['eval_seed'], TRAINING_CONFIG['eval_episodes'])
                 
@@ -231,7 +231,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 temp_member['score'] = reward 
                 shared_dict[i] = temp_member
 
-                print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_data['eval_seed']} \n")
+                print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {reward:.2f}, seed:{eval_data['eval_seed']}")
 
                 ranked_members, agent_rank = rank_members(shared_dict, i)
                 total_size = len(ranked_members)
@@ -245,7 +245,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                     better_config = copy.deepcopy(shared_dict[better_id]['configs'])
                     better_params = state_dict_to_device(shared_dict[better_id]['state_dict'], device)
 
-                    print(f" Agent {member.id} Exploiting member {better_id} with score {best_score:.2f}")
+                    print(f"   Agent {member.id} Exploiting member {better_id} with score {best_score:.2f}")
 
                     member.exploit(better_config, better_params, better_id, episode=episode)
                     member.explore(episode=episode, total_steps=total_steps)
@@ -254,11 +254,9 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                 if eval_data['eval_count'] % TRAINING_CONFIG['change_seed_every'] == 0:
                     eval_data['eval_seed'] += 1
-                    print(f" Agent {member.id} Changing eval seed to {eval_data['eval_count']}")
+                    print(f"   Agent {member.id} Changing eval seed to {eval_data['eval_count']}")
 
                 if agent_rank == 0:
-                    print(f" Agent {member.id} is the best member!")
-
                     # Update global best
                     if checkpoint_manager.update_best(
                         member_id=member.id,
