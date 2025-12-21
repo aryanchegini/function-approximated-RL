@@ -38,3 +38,5 @@ build/
 
 # Hex server sync folder
 hex/
+
+vast_ai_checkpoints_and_logs/
