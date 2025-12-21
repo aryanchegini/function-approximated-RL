@@ -246,12 +246,9 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                     better_params = state_dict_to_device(shared_dict[better_id]['state_dict'], device)
 
                     print(f" Agent {member.id} Exploiting member {better_id} with score {best_score:.2f}")
-                    print(f"old config: {member.config}")
 
                     member.exploit(better_config, better_params, better_id, episode=episode)
                     member.explore(episode=episode, total_steps=total_steps)
-
-                    print(f'new config:{member.config}')
 
                 shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config, reward, device)
 
@@ -261,7 +258,6 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                 if agent_rank == 0:
                     print(f" Agent {member.id} is the best member!")
-                    print(shared_dict)
 
                     # Update global best
                     if checkpoint_manager.update_best(
@@ -352,7 +348,7 @@ if __name__=='__main__':
         with Manager() as manager:
 
             shared_dict = manager.dict() 
-            eval_data = {}
+            eval_data = manager.dict() 
             eval_data['eval_seed'] = eval_seed
             eval_data['eval_count'] = 0
             # A shared dictionary containing a dict of members, 
