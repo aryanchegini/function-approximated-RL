@@ -253,7 +253,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 shared_dict = add_to_shared_dict(i, shared_dict, member.agent.state_dict(), member.config, reward, device)
 
                 if eval_data['eval_count'] % TRAINING_CONFIG['change_seed_every'] == 0:
-                    eval_data['eval_seed'] += 1
+                    eval_data['eval_seed'] += randint(10,50)
                     print(f"   Agent {member.id} Changing eval seed to {eval_data['eval_count']}")
 
                 if agent_rank == 0:
@@ -280,7 +280,6 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                             config=member.config
                         )
                         print(f" Saved periodic checkpoint at {total_steps} steps (best: member {i})")
-            
 
 
 if __name__=='__main__':

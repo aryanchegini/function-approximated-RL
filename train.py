@@ -22,8 +22,8 @@ from configs.SpaceInvadersConfig import (
 from scripts.evaluation import eval as evaluate_agent
 
 
-checkpoint_path = LOGGING_CONFIG['alt_checkpoint_dir']
-logs_path = LOGGING_CONFIG['alt_checkpoint_dir']
+checkpoint_path = LOGGING_CONFIG['checkpoint_dir']
+logs_path = LOGGING_CONFIG['checkpoint_dir']
 
 
 def train():
