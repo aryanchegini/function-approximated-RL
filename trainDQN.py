@@ -35,7 +35,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train():
 
-    env = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
+   
     agent = DQN(device, env)
         
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
@@ -150,14 +150,14 @@ def train():
 
             print(f"\n Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
 
-        
-        # Save best model
-        if mean_return_100 > best_mean_reward:
-            best_mean_reward = mean_return_100
-            best_path = f"{checkpoint_path}/best_model.pt"
-            agent.save(best_path)
-            print(f"New best model saved! Mean reward: {best_mean_reward:.2f}")
-        
+            
+            # Save best model
+            if mean_return_100 > best_mean_reward:
+                best_mean_reward = mean_return_100
+                best_path = f"{checkpoint_path}/best_model.pt"
+                agent.save(best_path)
+                print(f"New best model saved! Mean reward: {best_mean_reward:.2f}")
+            
 
         if episode % TRAINING_CONFIG['save_frequency'] == 0 and episode > 0:
             ep_checkpoint_path = f"{checkpoint_path}/checkpoint_ep{episode}.pt"

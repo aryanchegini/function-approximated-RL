@@ -31,7 +31,7 @@ TRAINING_CONFIG = {
     'max_steps_per_episode': 10000,  # Maximum steps per episode
     'learning_starts': 1000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 100,  # Evaluate every N episodes
+    'eval_frequency': 1000,  # Evaluate every N episodes
     'eval_episodes': 100,  # Number of episodes for evaluation
     'save_frequency': 200_000,  # Save checkpoint every N episodes
     'eval_seed':50
@@ -42,6 +42,7 @@ LOGGING_CONFIG = {
     'log_dir': 'logs/DQN',
     'checkpoint_dir': 'checkpoints/DQN',
     'alt_checkpoint_dir': 'vast_ai_checkpoints_and_logs/DQN',
+    'random_checkpoint_dir': 'checkpoints/Random',
     'tensorboard': True,  # Use TensorBoard logging
     'csv_logging': True,  # Use CSV logging
 }
