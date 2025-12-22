@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import time
 from AtariWrapper import make_atari_env
-from RainbowAgent import RainbowDQN
+from agents.RainbowAgent import RainbowDQN
 from configs import ENV_CONFIG, AGENT_CONFIG, DEVICE
 
 
