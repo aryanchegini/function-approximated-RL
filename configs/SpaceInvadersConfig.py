@@ -19,7 +19,8 @@ AGENT_CONFIG = {
     'learning_rate': 6.25e-5,  # Learning rate (Adam)
     'gamma': 0.99,  # Discount factor
     'n_step': 3,  # N-step returns
-    'target_update_freq': 1000,  # Target network update frequency (steps)
+    'target_update_freq': 1000,  # Target network update frequency (steps) 
+    'batch_size': 32,  # Batch size for training
 }
 
 # Replay buffer settings
@@ -39,7 +40,7 @@ TRAINING_CONFIG = {
     'max_steps_per_episode': 10000,  # Maximum steps per episode
     'learning_starts': 1000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 1_000,  # Evaluate every N episodes
+    'eval_frequency': 1000,  # Evaluate every N episodes
     'eval_episodes': 100,  # Number of episodes for evaluation
     'save_frequency': 200_000,  # Save checkpoint every N episodes
 }

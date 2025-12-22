@@ -1,6 +1,3 @@
-"""
-Atari Environment Wrappers
-"""
 import gymnasium as gym
 import ale_py
 import numpy as np

@@ -1,6 +1,7 @@
 # Python cache files
 __pycache__/
 *.py[cod]
+*.pyc
 *$py.class
 *.so
 
@@ -15,6 +16,8 @@ checkpoints/*.pth
 models/*.pt
 *.pth
 *.pt
+*.csv
+*.json
 
 # Logs and data
 logs/*.csv

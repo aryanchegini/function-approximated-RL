@@ -3,9 +3,10 @@ import numpy as np
 from collections import deque
 import time
 from datetime import timedelta
+from datetime import datetime
 import os
 import csv
-from RainbowAgent import RainbowDQN
+from agents.RainbowAgent import RainbowDQN
 from AtariWrapper import make_atari_env
 from buffers.replay_buffer import PrioritisedReplayBuffer
 from buffers.n_step_buffer import NStepBuffer
@@ -21,10 +22,8 @@ from configs.SpaceInvadersConfig import (
 
 from scripts.evaluation import eval as evaluate_agent
 
-
-checkpoint_path = LOGGING_CONFIG['alt_checkpoint_dir']
-logs_path = LOGGING_CONFIG['alt_checkpoint_dir']
-
+checkpoint_path = LOGGING_CONFIG['checkpoint_dir']
+logs_path = LOGGING_CONFIG['checkpoint_dir']
 
 def train():
     torch.manual_seed(SEED)
@@ -33,14 +32,12 @@ def train():
     env = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
     agent = RainbowDQN()
     
-    replay_buffer = PrioritisedReplayBuffer( capacity=BUFFER_CONFIG['capacity'], alpha=BUFFER_CONFIG['alpha'], beta_start=BUFFER_CONFIG['beta_start'], beta_frames=BUFFER_CONFIG['beta_frames'], eps=BUFFER_CONFIG['eps'], seed=BUFFER_CONFIG['seed'] )
-    
+    replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, seed=BUFFER_CONFIG['seed'])
     n_step_buffer = NStepBuffer( n_step=AGENT_CONFIG['n_step'], gamma=AGENT_CONFIG['gamma'] )
 
     # CSV Logging
     os.makedirs(logs_path, exist_ok=True)
     
-    from datetime import datetime
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
 
     log_file = os.path.join(logs_path, f'rainbow_space_invaders_{timestamp}.csv')
@@ -52,6 +49,7 @@ def train():
                         'mean_return_10', 'mean_return_100', 'avg_loss', 'buffer_size', 'actions_taken'])
     
     total_steps = 0
+
     agent.train_mode()
     
     training_start_time = time.time()
@@ -66,13 +64,11 @@ def train():
     best_mean_reward = -float('inf')
     eval_count = 0
 
-    
-
     for episode in range(1, TRAINING_CONFIG['num_episodes'] + 1):
         state, info = env.reset()
         episode_reward = 0
         episode_steps = 0
-        episode_actions = []  
+        episode_actions = []
         n_step_buffer.clear()
 
         episodic_loss = 0
@@ -160,14 +156,10 @@ def train():
             
         if episode % TRAINING_CONFIG['eval_frequency'] == 0:
             eval_count += 1
-            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(
+            eval_avg_reward, _, _, _ = evaluate_agent(
                 env, agent, SEED, 
-                num_episodes=TRAINING_CONFIG['eval_episodes'],
-                eval_count=eval_count,
-                log_file=eval_log_file
+                num_episodes=TRAINING_CONFIG['eval_episodes']
             )
-
-            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(env, agent, SEED, num_episodes=TRAINING_CONFIG['eval_episodes'])
 
             print(f"\n Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
 

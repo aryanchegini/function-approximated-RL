@@ -3,7 +3,7 @@ import torch
 import numpy as np
 import time
 from AtariWrapper import make_atari_env
-from RainbowAgent import RainbowDQN
+from agents.RainbowAgent import RainbowDQN
 from configs import ENV_CONFIG, AGENT_CONFIG, DEVICE
 
 
@@ -15,17 +15,34 @@ def watch_agent(checkpoint_path, num_episodes=5, render_delay=0.02):
         render_delay: Delay between frames (seconds) - lower = faster
     """
     
+    # Load checkpoint first to get the config
+    print(f"Loading checkpoint: {checkpoint_path}")
+    checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
+    
+    # Extract config from checkpoint (PBT saves agent config)
+    if 'config' in checkpoint:
+        agent_config = checkpoint['config']
+        print(f"Using config from checkpoint (num_atoms={agent_config.get('num_atoms', 'N/A')})")
+    else:
+        # Fallback: infer num_atoms from checkpoint structure
+        print("Warning: No config found in checkpoint, inferring from model structure...")
+        num_atoms = checkpoint['online_net']['2.atoms'].shape[0]
+        print(f"Detected num_atoms={num_atoms} from checkpoint")
+        
+        # Create config by copying AGENT_CONFIG and updating num_atoms
+        agent_config = AGENT_CONFIG.copy()
+        agent_config['num_atoms'] = num_atoms
+    
     # Create environment with rendering enabled
     env = make_atari_env(
         env_id=ENV_CONFIG['env_id'],
         render_mode='human'  # This enables the visual display
     )
     
-    # Create agent
-    agent = RainbowDQN()
+    # Create agent with checkpoint config
+    agent = RainbowDQN(config=agent_config)
     
-    # Load checkpoint
-    print(f"Loading checkpoint: {checkpoint_path}")
+    # Load the weights
     agent.load(checkpoint_path)
     agent.eval_mode()  # Set to evaluation mode (no noise)
     

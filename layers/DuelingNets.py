@@ -6,7 +6,7 @@ from .NoisyNets import NoisyLinear
 class DuelingNetwork(nn.Module):
     def __init__(self, feature_size, num_atoms, batch_size=32, num_actions=6, atoms=51):
         super(DuelingNetwork, self).__init__()
-        print("Feature size in DuelingNetwork:", feature_size)
+
         self.feature_size = feature_size
         self.num_atoms = num_atoms
         self.num_actions = num_actions  
