@@ -35,7 +35,7 @@ device = 'cuda' if torch.cuda.is_available() else 'cpu'
 
 def train():
 
-   
+    env = make_atari_env(ENV_CONFIG['env_id'], render_mode=None)
     agent = DQN(device, env)
         
     timestamp = datetime.now().strftime('%Y%m%d_%H%M%S')
