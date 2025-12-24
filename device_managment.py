@@ -367,7 +367,7 @@ if __name__=='__main__':
                 # add a place for an agent, score and device for each member of the population
                 shared_dict[i] = {'configs':None, 'state_dict': None, 'score':0, 'device':f'cuda:{device_id}' }
                 devices_dict[f'cuda:{device_id}']['members'].append(i)
-                print(f'Running agent {i} on gpu:{f'cuda:{device_id}'}')
+                print(f"Running agent {i} on gpu:{f'cuda:{device_id}'}")
 
             processes = []
             # Place each process on respective gpus
