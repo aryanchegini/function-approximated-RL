@@ -12,7 +12,7 @@ ENV_CONFIG = {
 PBT_CONFIG = {
     'population_size': 4,
     'exploit_fraction': 0.3,
-    'perturb_fraction': 0.1,
+    'perturb_fraction': 0.4,
 }
 
 PBT_AGENTS_CONFIG_TYPE = {
@@ -33,7 +33,7 @@ PBT_AGENTS_CONFIG = {
         'alpha': 0.5,  # PER alpha (prioritization exponent)
         'sigma': 0.3,
         'target_update_freq': 4000,
-        'beta_start': 0.1,
+        'beta_start': 0.4,
     },
     'upper_bounds':{
         'learning_rate': 5e-4,
@@ -42,7 +42,7 @@ PBT_AGENTS_CONFIG = {
         'alpha': 0.8,
         'sigma': 0.7,
         'target_update_freq': 20_000,
-        'beta_start': 0.5,
+        'beta_start': 0.4,
     }
 }
 
