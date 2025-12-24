@@ -89,8 +89,9 @@ class Member():
         self.config = copy.deepcopy(better_config)
         self.agent = RainbowDQN(self.config, self.device)
         self.agent.load_state_dict(better_params)
-        self.replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, alpha=self.config['alpha'], beta_start=self.config['beta_start'])
+        # self.replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, alpha=self.config['alpha'], beta_start=self.config['beta_start'])
         self.n_step_buffer = NStepBuffer(n_step=self.config['n_step'], gamma=self.config['gamma'])
+        self.replay_buffer.alpha = self.config['alpha']
         
         # Log exploit event
         self.logger.log_exploit(
