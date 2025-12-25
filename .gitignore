@@ -19,6 +19,9 @@ models/*.pt
 *.csv
 *.json
 
+# Exception: Track CSV files in All results folder
+!All\ results/**/*.csv
+
 # Logs and data
 logs/*.csv
 *.log
