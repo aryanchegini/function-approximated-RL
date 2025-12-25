@@ -4,12 +4,12 @@ Reinforcement Learning Experiments: Rainbow DQN, PBT, DQN, and Random Agents
 
 1. PBT VS BASELINE RAINBOW
 --------------------------------------------------------------------------------
-Baseline Rainbow Final Mean(100):  12.07
-PBT Population Final Mean(100):    8.73
-Baseline Average Return:            8.52
-PBT Average Return:                 8.36
+Baseline Rainbow Final Mean(100):  12.19
+PBT Population Final Mean(100):    9.23
+Baseline Average Return:            9.16
+PBT Average Return:                 8.35
 
-Baseline outperforms PBT by:        38.2%
+Baseline outperforms PBT by:        32.1%
 
 2. ALL AGENTS PERFORMANCE COMPARISON
 --------------------------------------------------------------------------------

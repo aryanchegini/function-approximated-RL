@@ -37,8 +37,8 @@ PLOT_DIR = BASE_DIR / "Plots"
 PLOT_DIR.mkdir(exist_ok=True)
 
 # Data files
-BASELINE_RAINBOW = BASE_DIR / "rainbow_files" / "rainbow_space_invaders_20251221_205859.csv"
-FINAL_RAINBOW = BASE_DIR / "rainbow_files" / "rainbow_space_invaders_20251221_205859.csv"  # Using same as baseline for now
+BASELINE_RAINBOW = BASE_DIR / "Initial Rainbow" / "rainbow_space_invaders_20251217_144501.csv"  # For PBT comparison
+FINAL_RAINBOW = BASE_DIR / "rainbow_files" / "rainbow_space_invaders_20251221_205859.csv"  # For final comparison
 DQN_FILE = BASE_DIR / "DQN" / "dqn_space_invaders_20251222_142017.csv"
 RANDOM_FILE = BASE_DIR / "Random" / "random_log.csv"
 
@@ -82,10 +82,17 @@ def load_data():
     """Load all experimental data"""
     data = {}
     
+    # Load Initial Rainbow for PBT comparison
     data['baseline_rainbow'] = pd.read_csv(BASELINE_RAINBOW)
-    rainbow_logged = len(data['baseline_rainbow'])
-    rainbow_actual = rainbow_logged * 10
-    print(f"Rainbow: {rainbow_actual:,} episodes, {data['baseline_rainbow']['total_steps'].iloc[-1]:,} steps")
+    baseline_logged = len(data['baseline_rainbow'])
+    baseline_actual = baseline_logged * 10
+    print(f"Initial Rainbow (PBT baseline): {baseline_actual:,} episodes, {data['baseline_rainbow']['total_steps'].iloc[-1]:,} steps")
+    
+    # Load Final Rainbow for overall comparison
+    data['final_rainbow'] = pd.read_csv(FINAL_RAINBOW)
+    final_logged = len(data['final_rainbow'])
+    final_actual = final_logged * 10
+    print(f"Final Rainbow: {final_actual:,} episodes, {data['final_rainbow']['total_steps'].iloc[-1]:,} steps")
     
     data['pbt_members'] = []
     for i, file in enumerate(PBT_FILES):
@@ -140,7 +147,8 @@ def analyze_pbt_vs_baseline(data):
     
     pbt_mean_returns = pd.DataFrame([df['mean_return_100'].values for df in pbt_aligned]).mean(axis=0)
     pbt_episode_returns = pd.DataFrame([df['episode_return'].values for df in pbt_aligned]).mean(axis=0)
-    episodes = np.arange(len(pbt_mean_returns))
+    
+    episodes = baseline_plot['episode'].values
     
     fig, axes = plt.subplots(1, 2, figsize=(16, 6))
 
@@ -187,8 +195,8 @@ def analyze_pbt_vs_baseline(data):
 def analyze_all_agents(data):
     """Rainbow vs DQN vs Random"""
     
-    # Use baseline rainbow as "final rainbow"
-    rainbow = data['baseline_rainbow']
+    # Use final rainbow for overall comparison
+    rainbow = data['final_rainbow']
     dqn = data['dqn']
     random = data['random']
     
@@ -282,7 +290,7 @@ def analyze_all_agents(data):
 
 def analyze_loss(data):
     """Loss Analysis"""
-    rainbow = data['baseline_rainbow']
+    rainbow = data['final_rainbow']
     
     fig, ax = plt.subplots(figsize=(14, 7))
     
@@ -313,7 +321,7 @@ def analyze_loss(data):
 def analyze_actions(data):
     """Action Distribution Analysis"""
     
-    rainbow = data['baseline_rainbow']
+    rainbow = data['final_rainbow']
     dqn = data['dqn']
     random = data['random']
     
