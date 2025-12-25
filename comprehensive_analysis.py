@@ -399,13 +399,21 @@ def analyze_pbt_hyperparameters(data):
     # Key hyperparameters to track
     key_params = ['learning_rate', 'gamma', 'batch_size', 'alpha', 'sigma']
     
-    fig, axes = plt.subplots(2, 3, figsize=(18, 10))
-    axes = axes.flatten()
+    fig = plt.figure(figsize=(20, 10))
+    gs = fig.add_gridspec(2, 3, hspace=0.30, wspace=0.3)
     
     colors_pbt = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6']
     
     for param_idx, param_name in enumerate(key_params):
-        ax = axes[param_idx]
+        if param_idx < 3:
+            row = 0
+            col = param_idx
+        else:
+            row = 1
+            col = param_idx - 3
+        ax = fig.add_subplot(gs[row, col])
+        
+        all_values = []
         
         # Plot evolution for each member
         for member_idx, exp_log in enumerate(exploration_logs):
@@ -418,28 +426,67 @@ def analyze_pbt_hyperparameters(data):
             if len(param_changes) == 0:
                 continue
             
-            # Build timeline of parameter values
             episodes = [0]
             values = [float(param_changes.iloc[0]['new_value'])]
             
-            for idx, row in param_changes.iloc[1:].iterrows():
-                episodes.append(int(row['episode']))
-                values.append(float(row['new_value']))
+            for idx, row_data in param_changes.iloc[1:].iterrows():
+                episodes.append(int(row_data['episode']))
+                values.append(float(row_data['new_value']))
             
-            ax.plot(episodes, values, label=f'Member {member_idx}', 
-                   color=colors_pbt[member_idx], linewidth=2, alpha=0.8, marker='o', markersize=4)
+            all_values.extend(values)
+            
+            ax.plot(episodes, values, label=f'M{member_idx}', 
+                   color=colors_pbt[member_idx], linewidth=1.5, alpha=0.7)
+            
+            if 'change_type' in param_changes.columns:
+                exploit_mask = param_changes['change_type'] == 'exploit'
+                
+                if exploit_mask.any():
+                    exploit_data = param_changes[exploit_mask]
+                    # Sample every 3rd exploit event to reduce clutter
+                    sample_indices = range(0, len(exploit_data), 3)
+                    exploit_episodes = exploit_data.iloc[sample_indices]['episode'].values
+                    exploit_values = [float(v) for v in exploit_data.iloc[sample_indices]['new_value'].values]
+                    
+                    if len(exploit_episodes) > 0:
+                        ax.scatter(exploit_episodes, exploit_values, marker='s', s=25, 
+                                  color=colors_pbt[member_idx], edgecolors='black', linewidths=0.5, 
+                                  zorder=3, alpha=0.8)
         
         param_display = param_name.replace('_', ' ').title()
-        ax.set_xlabel('Episode', fontsize=11)
-        ax.set_ylabel(param_display, fontsize=11)
-        ax.set_title(f'{param_display} Evolution', fontsize=12, fontweight='bold')
-        ax.legend(fontsize=9, loc='best')
-        ax.grid(True, alpha=0.3)
+        ax.set_xlabel('Episode', fontsize=10)
+        ax.set_ylabel(param_display, fontsize=10)
+        ax.set_title(f'{param_display} Evolution', fontsize=11, fontweight='bold')
+        ax.legend(fontsize=8, loc='best', ncol=2)
+        ax.grid(True, alpha=0.2, linestyle=':')
     
-    fig.delaxes(axes[5])
+
+    ax_events = fig.add_subplot(gs[1, 2])
     
-    plt.suptitle('PBT Hyperparameter Evolution Across Population', fontsize=14, fontweight='bold', y=0.995)
-    plt.tight_layout()
+    exploit_counts = []
+    explore_counts = []
+    for member_idx, exp_log in enumerate(exploration_logs):
+        if exp_log is None:
+            exploit_counts.append(0)
+            explore_counts.append(0)
+            continue
+        exploit_counts.append(len(exp_log[exp_log['change_type'] == 'exploit']))
+        explore_counts.append(len(exp_log[exp_log['change_type'] == 'explore']))
+    
+    x_pos = np.arange(5)
+    width = 0.35
+    ax_events.bar(x_pos - width/2, exploit_counts, width, label='Exploit', color='#10B981', alpha=0.8)
+    ax_events.bar(x_pos + width/2, explore_counts, width, label='Explore', color='#3B82F6', alpha=0.8)
+    
+    ax_events.set_xlabel('Member', fontsize=10)
+    ax_events.set_ylabel('Event Count', fontsize=10)
+    ax_events.set_title('PBT Actions per Member', fontsize=11, fontweight='bold')
+    ax_events.set_xticks(x_pos)
+    ax_events.set_xticklabels([f'M{i}' for i in range(5)])
+    ax_events.legend(fontsize=9)
+    ax_events.grid(True, alpha=0.2, axis='y', linestyle=':')
+    
+    plt.suptitle('PBT Hyperparameter Evolution Across Population', fontsize=15, fontweight='bold', y=0.995)
     plt.savefig(PLOT_DIR / "5_pbt_hyperparameter_evolution.png", bbox_inches='tight', dpi=300)
     plt.close()
 
