@@ -228,7 +228,7 @@ def analyze_all_agents(data):
         ax1.plot(episodes, random_smooth,
                 label='Random Agent', color=COLORS['random'], linewidth=2.5, linestyle='--', alpha=0.8)
     
-    ax1.set_xlabel('Logged Episode (every 10 episodes)', fontsize=13)
+    ax1.set_xlabel('Episode', fontsize=13)
     ax1.set_ylabel('Mean(100) Return', fontsize=13)
     ax1.set_title('Performance Comparison (Rolling Mean 500)', fontsize=14, fontweight='bold')
     ax1.legend(fontsize=12)
@@ -252,7 +252,7 @@ def analyze_all_agents(data):
         ax2.plot(episodes, cumsum_random.values,
                 label='Random Agent', color=COLORS['random'], linewidth=2.5, linestyle='--', alpha=0.8)
     
-    ax2.set_xlabel('Logged Episode (every 10 episodes)', fontsize=13)
+    ax2.set_xlabel('Episodes', fontsize=13)
     ax2.set_ylabel('Cumulative Episode Return', fontsize=13)
     ax2.set_title('Cumulative Returns Over Training', fontsize=14, fontweight='bold')
     ax2.legend(fontsize=12)
