@@ -239,8 +239,11 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                     # print('ranks:',agent_rank)
 
-                    better_id =  ranked_members[randint(0, int(total_size * (1 - exploit_fraction)) + 1)][0]
+                    better_id =  ranked_members[randint(0, int(total_size * (1 - exploit_fraction)))][0]
                     best_score = ranked_members[better_id][1]['score']
+
+                    if better_id==member.id:
+                        print(f'uncorrect exploit as agent rank {agent_rank}, agent: {member.id} and exploited itsels {better_id}')
                     
                     better_config = copy.deepcopy(shared_dict[better_id]['configs'])
                     better_params = state_dict_to_device(shared_dict[better_id]['state_dict'], device)

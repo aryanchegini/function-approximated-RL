@@ -12,7 +12,7 @@ ENV_CONFIG = {
 PBT_CONFIG = {
     'population_size': 4,
     'exploit_fraction': 0.3,
-    'perturb_fraction': 0.4,
+    'perturb_fraction': 0.2,
 }
 
 PBT_AGENTS_CONFIG_TYPE = {
@@ -28,19 +28,19 @@ PBT_AGENTS_CONFIG_TYPE = {
 PBT_AGENTS_CONFIG = {
     'lower_bounds':{
         'learning_rate': 1e-5,
-        'gamma': 0.97,
+        'gamma': 0.99,
         'batch_size': 32, 
         'alpha': 0.5,  # PER alpha (prioritization exponent)
-        'sigma': 0.3,
-        'target_update_freq': 4000,
+        'sigma': 0.35,
+        'target_update_freq': 6000,
         'beta_start': 0.4,
     },
     'upper_bounds':{
         'learning_rate': 5e-4,
         'gamma': 0.99999,
         'batch_size': 64,
-        'alpha': 0.8,
-        'sigma': 0.7,
+        'alpha': 0.7,
+        'sigma': 0.6,
         'target_update_freq': 20_000,
         'beta_start': 0.4,
     }
@@ -74,11 +74,11 @@ TRAINING_CONFIG = {
     'total_training_steps': 10_000_000,  # Total steps for entire training run
     'learning_starts': 50_000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 800,  # Evaluate every N episodes
-    'eval_episodes': 200,  # Number of episodes for evaluation
+    'eval_frequency': 1000,  # Evaluate every N episodes
+    'eval_episodes': 250,  # Number of episodes for evaluation
     'save_frequency': 5_000,  # Save checkpoint every N episodes
     'eval_seed': 50,  # Seed for evaluation environment
-    'change_seed_every': 20  # Change evaluation seed every N evaluations
+    'change_seed_every': 10  # Change evaluation seed every N evaluations
 }
 
 
