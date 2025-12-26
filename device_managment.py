@@ -281,6 +281,8 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                         )
                         print(f" Saved periodic checkpoint at {total_steps} steps (best: member {i})")
 
+    print(f'Thread {id} on device:{device} finished training after {episode} episodes')
+
 
 if __name__=='__main__':
 
@@ -338,8 +340,6 @@ if __name__=='__main__':
 
     elif len(gpus) >= 1:
 
-        
-
         mp.set_start_method('spawn', force=True) # Allows multiprocessing
     
         with Manager() as manager:
@@ -373,7 +373,7 @@ if __name__=='__main__':
             # Place each process on respective gpus
             for i, gpu in enumerate(gpus):
                 process = Process(target = training_thread,
-                args = (i, 
+                    args = (i, 
                         gpus[gpu], 
                         devices_dict[gpu]['members'], 
                         shared_dict,
@@ -383,8 +383,9 @@ if __name__=='__main__':
                 process.start()
                 processes.append(process)
 
-            for p in processes:
+            for i, p in enumerate(processes):
                 p.join()
+                print(f'Thread {i} terminated')
 
         print('Training Complete')
 
