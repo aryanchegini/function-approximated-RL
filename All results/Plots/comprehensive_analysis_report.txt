@@ -1,15 +1,17 @@
 ================================================================================
-Reinforcement Learning Experiments: Rainbow DQN, PBT, DQN, and Random Agents
+Reinforcement Learning Experiments: Rainbow DQN, PBT Rainbow, DQN, and Random
 ================================================================================
 
-1. PBT VS BASELINE RAINBOW
+1. RAINBOW DQN VS BEST PBT MEMBER
 --------------------------------------------------------------------------------
-Baseline Rainbow Final Mean(100):  12.19
-PBT Population Final Mean(100):    9.23
-Baseline Average Return:            9.16
-PBT Average Return:                 8.35
+Rainbow DQN Mean(100):              15.94
+Best PBT Member Mean(100):          23.49
 
-Baseline outperforms PBT by:        32.1%
+Rainbow DQN Average Return:         14.02
+Best PBT Average Return:            16.66
+
+Best PBT outperforms Rainbow DQN by:    7.55 points
+Best PBT Member:                    Member 3
 
 2. ALL AGENTS PERFORMANCE COMPARISON
 --------------------------------------------------------------------------------
@@ -18,6 +20,11 @@ RAINBOW:
   Final Mean(100):     15.94
   Mean Return:         14.02 ± 12.97
   Max Return:          93.00
+
+PBT_RAINBOW:
+  Final Mean(100):     23.49
+  Mean Return:         16.66 ± 16.21
+  Max Return:          115.00
 
 DQN:
   Final Mean(100):     6.63
@@ -30,9 +37,12 @@ RANDOM:
   Max Return:          29.00
 
 RELATIVE IMPROVEMENTS:
-  Rainbow vs Random:   4.53x better
-  DQN vs Random:       1.88x better
-  Rainbow vs DQN:      2.40x better
+  PBT Rainbow vs Rainbow DQN:    1.47x better
+  Rainbow DQN vs Random:         4.53x better
+  PBT Rainbow vs Random:         6.67x better
+  DQN vs Random:                 1.88x better
+  Rainbow DQN vs DQN:            2.40x better
+  PBT Rainbow vs DQN:            3.54x better
 
 3. ACTION DISTRIBUTION ANALYSIS
 --------------------------------------------------------------------------------

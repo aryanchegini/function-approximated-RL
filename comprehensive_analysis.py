@@ -28,7 +28,8 @@ COLORS = {
     'pbt': '#10B981',      
     'dqn': '#F59E0B',     
     'random': '#EF4444',  
-    'final_rainbow': '#3B82F6'
+    'final_rainbow': '#3B82F6',
+    'success': '#22C55E'
 }
 
 # File paths
@@ -37,16 +38,15 @@ PLOT_DIR = BASE_DIR / "Plots"
 PLOT_DIR.mkdir(exist_ok=True)
 
 # Data files
-BASELINE_RAINBOW = BASE_DIR / "Initial Rainbow" / "rainbow_space_invaders_20251217_144501.csv"  # For PBT comparison
-FINAL_RAINBOW = BASE_DIR / "rainbow_files" / "rainbow_space_invaders_20251221_205859.csv"  # For final comparison
+FINAL_RAINBOW = BASE_DIR / "rainbow_files" / "rainbow_space_invaders_20251221_205859.csv"  # Rainbow DQN model
 DQN_FILE = BASE_DIR / "DQN" / "dqn_space_invaders_20251222_142017.csv"
 RANDOM_FILE = BASE_DIR / "Random" / "random_log.csv"
 
-# PBT files
-PBT_DIR = BASE_DIR / "PBT"
-PBT_FILES = [
-    PBT_DIR / f"member_{i}" / "episode_log.csv" 
-    for i in range(5)
+# PBT Rainbow files 
+PBT_RAINBOW_DIR = BASE_DIR / "PBT Rainbow"
+PBT_RAINBOW_FILES = [
+    PBT_RAINBOW_DIR / f"member_{i}" / "episode_log.csv" 
+    for i in range(4) 
 ]
 
 
@@ -82,24 +82,19 @@ def load_data():
     """Load all experimental data"""
     data = {}
     
-    # Load Initial Rainbow for PBT comparison
-    data['baseline_rainbow'] = pd.read_csv(BASELINE_RAINBOW)
-    baseline_logged = len(data['baseline_rainbow'])
-    baseline_actual = baseline_logged * 10
-    print(f"Initial Rainbow (PBT baseline): {baseline_actual:,} episodes, {data['baseline_rainbow']['total_steps'].iloc[-1]:,} steps")
-    
-    # Load Final Rainbow for overall comparison
+    # Load Rainbow DQN
     data['final_rainbow'] = pd.read_csv(FINAL_RAINBOW)
     final_logged = len(data['final_rainbow'])
     final_actual = final_logged * 10
-    print(f"Final Rainbow: {final_actual:,} episodes, {data['final_rainbow']['total_steps'].iloc[-1]:,} steps")
+    print(f"Rainbow DQN: {final_actual:,} episodes, {data['final_rainbow']['total_steps'].iloc[-1]:,} steps")
     
-    data['pbt_members'] = []
-    for i, file in enumerate(PBT_FILES):
+    # Load PBT Rainbow members
+    data['pbt_rainbow_members'] = []
+    for i, file in enumerate(PBT_RAINBOW_FILES):
         if file.exists():
             df = pd.read_csv(file)
-            data['pbt_members'].append(df)
-    print(f"PBT: {len(data['pbt_members'])} members loaded")
+            data['pbt_rainbow_members'].append(df)
+    print(f"PBT Rainbow: {len(data['pbt_rainbow_members'])} members loaded")
     
     if DQN_FILE.exists():
         data['dqn'] = pd.read_csv(DQN_FILE)
@@ -123,100 +118,198 @@ def load_data():
     return data
 
 
-def analyze_pbt_vs_baseline(data):
-    """PBT vs Baseline Rainbow"""
-    baseline = data['baseline_rainbow']
-    pbt_members = data['pbt_members']
+def analyze_rainbow_vs_pbt_rainbow(data):
+    """Rainbow DQN vs Best PBT Member Comparison"""
+    final_rainbow = data['final_rainbow']
+    pbt_members = data['pbt_rainbow_members']
     
     if not pbt_members:
+        print("Warning: No PBT Rainbow members found")
         return
     
-    # Find minimum steps across all PBT members
-    min_steps = min(df['total_steps'].iloc[-1] for df in pbt_members)
+    # Find best PBT member by final mean_return_100
+    best_pbt_idx = max(range(len(pbt_members)), key=lambda i: pbt_members[i]['mean_return_100'].iloc[-1])
+    best_pbt = pbt_members[best_pbt_idx]
     
-    baseline_truncated = baseline[baseline['total_steps'] <= min_steps].copy()
-    pbt_truncated = [df[df['total_steps'] <= min_steps].copy() for df in pbt_members]
+    # Find common episode range for comparison
+    min_episodes = min(len(final_rainbow), len(best_pbt))
     
-    min_episodes = min(
-        min(len(df) for df in pbt_truncated),
-        len(baseline_truncated)
-    )
+    # Prepare data
+    final_rainbow_plot = final_rainbow.iloc[:min_episodes].reset_index(drop=True)
+    best_pbt_plot = best_pbt.iloc[:min_episodes].reset_index(drop=True)
     
-    pbt_aligned = [df.iloc[:min_episodes].reset_index(drop=True) for df in pbt_truncated]
-    baseline_plot = baseline_truncated.iloc[:min_episodes].reset_index(drop=True)
+    episodes = final_rainbow_plot['episode'].values
     
-    pbt_mean_returns = pd.DataFrame([df['mean_return_100'].values for df in pbt_aligned]).mean(axis=0)
-    pbt_episode_returns = pd.DataFrame([df['episode_return'].values for df in pbt_aligned]).mean(axis=0)
-    
-    episodes = baseline_plot['episode'].values
-    
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(18, 6))
 
+    # Plot 1: Mean(100) Comparison
     ax1 = axes[0]
-    baseline_smooth = rolling_mean_for_plot(baseline_plot['mean_return_100'].values, window=10)
-    pbt_smooth = rolling_mean_for_plot(pbt_mean_returns.values, window=10)
     
-    ax1.plot(episodes, baseline_smooth, 
-             label='Baseline Rainbow', color=COLORS['rainbow'], linewidth=2.5, alpha=0.9)
-    ax1.plot(episodes, pbt_smooth, 
-             label='PBT Rainbow (population mean)', color=COLORS['pbt'], linewidth=2.5, alpha=0.9)
-    ax1.set_xlabel('Episode', fontsize=13)
-    ax1.set_ylabel('Mean Return (100 episodes)', fontsize=13)
-    ax1.set_title('PBT vs Baseline Rainbow: Mean(100) Performance', fontsize=14, fontweight='bold')
-    ax1.legend(fontsize=12)
-    ax1.grid(True, alpha=0.3)
+    rainbow_smooth = rolling_mean_for_plot(final_rainbow_plot['mean_return_100'].values, window=50)
+    best_pbt_smooth = rolling_mean_for_plot(best_pbt_plot['mean_return_100'].values, window=50)
+    
+    ax1.plot(episodes, rainbow_smooth, 
+             label=f'Rainbow DQN (Mean(100)={final_rainbow_plot["mean_return_100"].iloc[-1]:.2f})', 
+             color=COLORS['rainbow'], linewidth=3, alpha=0.9)
+    ax1.plot(episodes, best_pbt_smooth, 
+             label=f'Best PBT Member M{best_pbt_idx} (Mean(100)={best_pbt_plot["mean_return_100"].iloc[-1]:.2f})', 
+             color=COLORS['success'], linewidth=3, alpha=0.9)
+    
+    ax1.set_xlabel('Episode', fontsize=13, fontweight='bold')
+    ax1.set_ylabel('Mean Return (100 episodes)', fontsize=13, fontweight='bold')
+    ax1.set_title('Rainbow DQN vs Best PBT Member: Performance Comparison', fontsize=14, fontweight='bold')
+    ax1.legend(fontsize=11, loc='best')
+    ax1.grid(True, alpha=0.3, linestyle=':')
    
+    # Plot 2: Cumulative Returns
     ax2 = axes[1]
-    baseline_ep_smooth = rolling_mean_for_plot(baseline_plot['episode_return'].values, window=20)
-    pbt_ep_smooth = rolling_mean_for_plot(pbt_episode_returns.values, window=20)
     
-    ax2.plot(episodes, baseline_ep_smooth, 
-             label='Baseline Rainbow', color=COLORS['rainbow'], linewidth=2.5, alpha=0.9)
-    ax2.plot(episodes, pbt_ep_smooth, 
-             label='PBT Rainbow (population mean)', color=COLORS['pbt'], linewidth=2.5, alpha=0.9)
-    ax2.set_xlabel('Episode', fontsize=13)
-    ax2.set_ylabel('Episode Return', fontsize=13)
-    ax2.set_title('PBT vs Baseline Rainbow: Episode Returns', fontsize=14, fontweight='bold')
-    ax2.legend(fontsize=12)
-    ax2.grid(True, alpha=0.3)
+    rainbow_cumulative = np.cumsum(final_rainbow_plot['episode_return'].values)
+    best_pbt_cumulative = np.cumsum(best_pbt_plot['episode_return'].values)
+    
+    ax2.plot(episodes, rainbow_cumulative, 
+             label='Rainbow DQN', color=COLORS['rainbow'], linewidth=3, alpha=0.9)
+    ax2.plot(episodes, best_pbt_cumulative, 
+             label=f'Best PBT Member M{best_pbt_idx}', color=COLORS['success'], 
+             linewidth=3, alpha=0.9)
+    
+    ax2.set_xlabel('Episode', fontsize=13, fontweight='bold')
+    ax2.set_ylabel('Cumulative Return', fontsize=13, fontweight='bold')
+    ax2.set_title('Cumulative Performance Over Training', fontsize=14, fontweight='bold')
+    ax2.legend(fontsize=11, loc='best')
+    ax2.grid(True, alpha=0.3, linestyle=':')
     
     plt.tight_layout()
-    plt.savefig(PLOT_DIR / "1_pbt_vs_baseline.png", bbox_inches='tight', dpi=300)
+    plt.savefig(PLOT_DIR / "1_rainbow_vs_best_pbt.png", bbox_inches='tight', dpi=300)
     plt.close()
     
+    print(f"\n✓ Saved: 1_rainbow_vs_best_pbt.png")
+    print(f"  Rainbow DQN final Mean(100): {final_rainbow_plot['mean_return_100'].iloc[-1]:.2f}")
+    print(f"  Best PBT Member M{best_pbt_idx} final Mean(100): {best_pbt_plot['mean_return_100'].iloc[-1]:.2f}")
+    
     return {
-        'baseline_final_mean100': baseline_plot['mean_return_100'].iloc[-1],
-        'pbt_final_mean100': pbt_mean_returns.iloc[-1],
-        'baseline_mean': baseline_plot['episode_return'].mean(),
-        'pbt_mean': pbt_episode_returns.mean()
+        'rainbow_final_mean100': final_rainbow_plot['mean_return_100'].iloc[-1],
+        'best_pbt_final_mean100': best_pbt_plot['mean_return_100'].iloc[-1],
+        'rainbow_mean': final_rainbow_plot['episode_return'].mean(),
+        'best_pbt_mean': best_pbt_plot['episode_return'].mean(),
+        'best_pbt_idx': best_pbt_idx
+    }
+
+
+def analyze_pbt_population(data):
+    """Best PBT Member vs Population Average"""
+    pbt_members = data['pbt_rainbow_members']
+    
+    if not pbt_members:
+        print("Warning: No PBT Rainbow members found")
+        return
+    
+    best_pbt_idx = max(range(len(pbt_members)), key=lambda i: pbt_members[i]['mean_return_100'].iloc[-1])
+    best_pbt = pbt_members[best_pbt_idx]
+    
+    # Calculate population average
+    min_episodes_pbt = min(len(df) for df in pbt_members)
+    pbt_aligned = [df.iloc[:min_episodes_pbt].reset_index(drop=True) for df in pbt_members]
+    
+    # Average across all members
+    pbt_avg_mean_100 = pd.DataFrame([df['mean_return_100'].values for df in pbt_aligned]).mean(axis=0)
+    pbt_avg_episode_return = pd.DataFrame([df['episode_return'].values for df in pbt_aligned]).mean(axis=0)
+    
+    episodes = pbt_aligned[0]['episode'].values
+    
+    fig, axes = plt.subplots(1, 2, figsize=(18, 6))
+    
+    # Plot 1: Mean(100) comparison
+    ax1 = axes[0]
+    
+    best_smooth = rolling_mean_for_plot(best_pbt['mean_return_100'].iloc[:min_episodes_pbt].values, window=50)
+    avg_smooth = rolling_mean_for_plot(pbt_avg_mean_100.values, window=50)
+    
+    ax1.plot(episodes, best_smooth,
+            label=f'Best Member M{best_pbt_idx} (Mean(100)={best_pbt["mean_return_100"].iloc[:min_episodes_pbt].iloc[-1]:.2f})',
+            color=COLORS['success'], linewidth=3, alpha=0.9)
+    ax1.plot(episodes, avg_smooth,
+            label=f'Population Average (Mean(100)={pbt_avg_mean_100.iloc[-1]:.2f})',
+            color='#F59E0B', linewidth=3, alpha=0.9)
+    
+    ax1.set_xlabel('Episode', fontsize=13, fontweight='bold')
+    ax1.set_ylabel('Mean Return (100 episodes)', fontsize=13, fontweight='bold')
+    ax1.set_title('PBT: Best Member vs Population Average', fontsize=14, fontweight='bold')
+    ax1.legend(fontsize=11, loc='best')
+    ax1.grid(True, alpha=0.3, linestyle=':')
+    
+    # Plot 2: Cumulative returns
+    ax2 = axes[1]
+    
+    best_cumulative = np.cumsum(best_pbt['episode_return'].iloc[:min_episodes_pbt].values)
+    avg_cumulative = np.cumsum(pbt_avg_episode_return.values)
+    
+    ax2.plot(episodes, best_cumulative,
+            label=f'Best Member M{best_pbt_idx}',
+            color=COLORS['success'], linewidth=3, alpha=0.9)
+    ax2.plot(episodes, avg_cumulative,
+            label='Population Average',
+            color='#F59E0B', linewidth=3, alpha=0.9)
+    
+    ax2.set_xlabel('Episode', fontsize=13, fontweight='bold')
+    ax2.set_ylabel('Cumulative Return', fontsize=13, fontweight='bold')
+    ax2.set_title('Cumulative Performance', fontsize=14, fontweight='bold')
+    ax2.legend(fontsize=11, loc='best')
+    ax2.grid(True, alpha=0.3, linestyle=':')
+    
+    plt.tight_layout()
+    plt.savefig(PLOT_DIR / "2_pbt_best_vs_average.png", bbox_inches='tight', dpi=300)
+    plt.close()
+    
+    print(f"\n✓ Saved: 2_pbt_best_vs_average.png")
+    print(f"  Best Member M{best_pbt_idx} final Mean(100): {best_pbt['mean_return_100'].iloc[:min_episodes_pbt].iloc[-1]:.2f}")
+    print(f"  Population Average final Mean(100): {pbt_avg_mean_100.iloc[-1]:.2f}")
+    
+    return {
+        'best_pbt_idx': best_pbt_idx,
+        'best_pbt_mean100': best_pbt['mean_return_100'].iloc[:min_episodes_pbt].iloc[-1],
+        'population_avg_mean100': pbt_avg_mean_100.iloc[-1]
     }
 
 
 def analyze_all_agents(data):
-    """Rainbow vs DQN vs Random"""
+    """Rainbow vs PBT Rainbow vs DQN vs Random"""
     
-    # Use final rainbow for overall comparison
+    # Use rainbow for overall comparison
     rainbow = data['final_rainbow']
     dqn = data['dqn']
     random = data['random']
+    pbt_members = data['pbt_rainbow_members']
     
-    valid_agents = [df for df in [rainbow, dqn, random] if df is not None]
+    # Find best PBT member
+    best_pbt = None
+    best_pbt_idx = None
+    if pbt_members:
+        best_pbt_idx = max(range(len(pbt_members)), key=lambda i: pbt_members[i]['mean_return_100'].iloc[-1])
+        best_pbt = pbt_members[best_pbt_idx]
+    
+    valid_agents = [df for df in [rainbow, best_pbt, dqn, random] if df is not None]
     if not valid_agents:
         return
     
     min_episodes = min(len(df) for df in valid_agents)
     
-    fig, axes = plt.subplots(1, 2, figsize=(16, 6))
+    fig, axes = plt.subplots(1, 2, figsize=(18, 6))
     
     ax1 = axes[0]
     episodes = np.arange(min_episodes)
     
-    window = 500
+    window = 50
     
     if rainbow is not None:
         rainbow_smooth = rolling_mean_for_plot(rainbow['mean_return_100'].iloc[:min_episodes].values, window=window)
         ax1.plot(episodes, rainbow_smooth,
                 label='Rainbow DQN', color=COLORS['rainbow'], linewidth=3, alpha=0.9)
+    
+    if best_pbt is not None:
+        pbt_smooth = rolling_mean_for_plot(best_pbt['mean_return_100'].iloc[:min_episodes].values, window=window)
+        ax1.plot(episodes, pbt_smooth,
+                label=f'PBT Rainbow (M{best_pbt_idx})', color=COLORS['success'], linewidth=3, alpha=0.9)
     
     if dqn is not None:
         dqn_smooth = rolling_mean_for_plot(dqn['mean_return_100'].iloc[:min_episodes].values, window=window)
@@ -226,12 +319,12 @@ def analyze_all_agents(data):
     if random is not None:
         random_smooth = rolling_mean_for_plot(random['mean_return_100'].iloc[:min_episodes].values, window=window)
         ax1.plot(episodes, random_smooth,
-                label='Random Agent', color=COLORS['random'], linewidth=2.5, linestyle='--', alpha=0.8)
+                label='Random Agent', color=COLORS['random'], linewidth=3, alpha=0.9)
     
-    ax1.set_xlabel('Episode', fontsize=13)
-    ax1.set_ylabel('Mean(100) Return', fontsize=13)
-    ax1.set_title('Performance Comparison (Rolling Mean 500)', fontsize=14, fontweight='bold')
-    ax1.legend(fontsize=12)
+    ax1.set_xlabel('Episode', fontsize=13, fontweight='bold')
+    ax1.set_ylabel('Mean(100) Return', fontsize=13, fontweight='bold')
+    ax1.set_title('All Agents: Performance Comparison', fontsize=14, fontweight='bold')
+    ax1.legend(fontsize=11, loc='best')
     ax1.grid(True, alpha=0.3)
     
     # Plot 2: Cumulative Episode Return
@@ -242,6 +335,11 @@ def analyze_all_agents(data):
         ax2.plot(episodes, cumsum_rainbow.values,
                 label='Rainbow DQN', color=COLORS['rainbow'], linewidth=3, alpha=0.9)
     
+    if best_pbt is not None:
+        cumsum_pbt = best_pbt['episode_return'].iloc[:min_episodes].cumsum()
+        ax2.plot(episodes, cumsum_pbt.values,
+                label=f'PBT Rainbow (M{best_pbt_idx})', color=COLORS['success'], linewidth=3, alpha=0.9)
+    
     if dqn is not None:
         cumsum_dqn = dqn['episode_return'].iloc[:min_episodes].cumsum()
         ax2.plot(episodes, cumsum_dqn.values,
@@ -250,16 +348,16 @@ def analyze_all_agents(data):
     if random is not None:
         cumsum_random = random['episode_return'].iloc[:min_episodes].cumsum()
         ax2.plot(episodes, cumsum_random.values,
-                label='Random Agent', color=COLORS['random'], linewidth=2.5, linestyle='--', alpha=0.8)
+                label='Random Agent', color=COLORS['random'], linewidth=3, alpha=0.9)
     
-    ax2.set_xlabel('Episodes', fontsize=13)
-    ax2.set_ylabel('Cumulative Episode Return', fontsize=13)
+    ax2.set_xlabel('Episodes', fontsize=13, fontweight='bold')
+    ax2.set_ylabel('Cumulative Episode Return', fontsize=13, fontweight='bold')
     ax2.set_title('Cumulative Returns Over Training', fontsize=14, fontweight='bold')
-    ax2.legend(fontsize=12)
+    ax2.legend(fontsize=11, loc='best')
     ax2.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig(PLOT_DIR / "2_all_agents_performance.png", bbox_inches='tight', dpi=300)
+    plt.savefig(PLOT_DIR / "3_all_agents_performance.png", bbox_inches='tight', dpi=300)
     plt.close()
     
     stats = {}
@@ -269,6 +367,14 @@ def analyze_all_agents(data):
             'mean_return': rainbow['episode_return'].mean(),
             'std_return': rainbow['episode_return'].std(),
             'max_return': rainbow['episode_return'].max()
+        }
+    if best_pbt is not None:
+        stats['pbt_rainbow'] = {
+            'final_mean100': best_pbt['mean_return_100'].iloc[-1],
+            'mean_return': best_pbt['episode_return'].mean(),
+            'std_return': best_pbt['episode_return'].std(),
+            'max_return': best_pbt['episode_return'].max(),
+            'member_idx': best_pbt_idx
         }
     if dqn is not None:
         stats['dqn'] = {
@@ -314,7 +420,7 @@ def analyze_loss(data):
     ax.grid(True, alpha=0.3)
     
     plt.tight_layout()
-    plt.savefig(PLOT_DIR / "3_loss_analysis.png", bbox_inches='tight', dpi=300)
+    plt.savefig(PLOT_DIR / "4_loss_analysis.png", bbox_inches='tight', dpi=300)
     plt.close()
 
 
@@ -374,7 +480,7 @@ def analyze_actions(data):
     ax.grid(True, alpha=0.3, axis='y')
     
     plt.tight_layout()
-    plt.savefig(PLOT_DIR / "4_action_distributions.png", bbox_inches='tight', dpi=300)
+    plt.savefig(PLOT_DIR / "5_action_distributions.png", bbox_inches='tight', dpi=300)
     plt.close()
     
     return action_counts
@@ -382,15 +488,16 @@ def analyze_actions(data):
 
 def analyze_pbt_hyperparameters(data):
     """PBT Hyperparameter Evolution"""
-    pbt_members = data['pbt_members']
+    pbt_members = data['pbt_rainbow_members']
     
     if not pbt_members:
+        print("Warning: No PBT Rainbow members found for hyperparameter analysis")
         return
     
-    # Load exploration logs for all members
+    # Load exploration logs for all PBT Rainbow members
     exploration_logs = []
-    for i in range(5):
-        exp_file = PBT_DIR / f"member_{i}" / "exploration_log.csv"
+    for i in range(len(pbt_members)):
+        exp_file = PBT_RAINBOW_DIR / f"member_{i}" / "exploration_log.csv"
         if exp_file.exists():
             exploration_logs.append(pd.read_csv(exp_file))
         else:
@@ -400,7 +507,7 @@ def analyze_pbt_hyperparameters(data):
     key_params = ['learning_rate', 'gamma', 'batch_size', 'alpha', 'sigma']
     
     fig = plt.figure(figsize=(20, 10))
-    gs = fig.add_gridspec(2, 3, hspace=0.30, wspace=0.3)
+    gs = fig.add_gridspec(2, 3, hspace=0.35, wspace=0.3)
     
     colors_pbt = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444', '#8B5CF6']
     
@@ -413,10 +520,8 @@ def analyze_pbt_hyperparameters(data):
             col = param_idx - 3
         ax = fig.add_subplot(gs[row, col])
         
-        all_values = []
-        
-        # Plot evolution for each member
-        for member_idx, exp_log in enumerate(exploration_logs):
+        # Plot parameter value vs performance for each member
+        for member_idx, (exp_log, member_data) in enumerate(zip(exploration_logs, pbt_members)):
             if exp_log is None:
                 continue
             
@@ -426,41 +531,34 @@ def analyze_pbt_hyperparameters(data):
             if len(param_changes) == 0:
                 continue
             
-            episodes = [0]
-            values = [float(param_changes.iloc[0]['new_value'])]
+            param_values = []
+            eval_rewards = []
             
-            for idx, row_data in param_changes.iloc[1:].iterrows():
-                episodes.append(int(row_data['episode']))
-                values.append(float(row_data['new_value']))
-            
-            all_values.extend(values)
-            
-            ax.plot(episodes, values, label=f'M{member_idx}', 
-                   color=colors_pbt[member_idx], linewidth=1.5, alpha=0.7)
-            
-            if 'change_type' in param_changes.columns:
-                exploit_mask = param_changes['change_type'] == 'exploit'
+            for idx, row_data in param_changes.iterrows():
+                episode = int(row_data['episode'])
+                param_val = float(row_data['new_value'])
                 
-                if exploit_mask.any():
-                    exploit_data = param_changes[exploit_mask]
-                    # Sample every 3rd exploit event to reduce clutter
-                    sample_indices = range(0, len(exploit_data), 3)
-                    exploit_episodes = exploit_data.iloc[sample_indices]['episode'].values
-                    exploit_values = [float(v) for v in exploit_data.iloc[sample_indices]['new_value'].values]
-                    
-                    if len(exploit_episodes) > 0:
-                        ax.scatter(exploit_episodes, exploit_values, marker='s', s=25, 
-                                  color=colors_pbt[member_idx], edgecolors='black', linewidths=0.5, 
-                                  zorder=3, alpha=0.8)
+                # Find the closest episode in member_data to get episode return
+                member_episodes = member_data['episode'].values
+                closest_idx = np.argmin(np.abs(member_episodes - episode))
+                eval_reward = member_data.iloc[closest_idx]['episode_return']
+                
+                param_values.append(param_val)
+                eval_rewards.append(eval_reward)
+            
+            if len(param_values) > 0:
+                ax.scatter(param_values, eval_rewards, 
+                          s=40, alpha=0.7,
+                          label=f'M{member_idx}', 
+                          color=colors_pbt[member_idx])
         
         param_display = param_name.replace('_', ' ').title()
-        ax.set_xlabel('Episode', fontsize=10)
-        ax.set_ylabel(param_display, fontsize=10)
-        ax.set_title(f'{param_display} Evolution', fontsize=11, fontweight='bold')
-        ax.legend(fontsize=8, loc='best', ncol=2)
-        ax.grid(True, alpha=0.2, linestyle=':')
+        ax.set_xlabel(param_display, fontsize=10, fontweight='bold')
+        ax.set_ylabel('Episode Return', fontsize=10, fontweight='bold')
+        ax.set_title(f'Performance vs {param_display}', fontsize=11, fontweight='bold')
+        ax.legend(fontsize=8, loc='best')
+        ax.grid(True, alpha=0.3, linestyle=':')
     
-
     ax_events = fig.add_subplot(gs[1, 2])
     
     exploit_counts = []
@@ -473,7 +571,8 @@ def analyze_pbt_hyperparameters(data):
         exploit_counts.append(len(exp_log[exp_log['change_type'] == 'exploit']))
         explore_counts.append(len(exp_log[exp_log['change_type'] == 'explore']))
     
-    x_pos = np.arange(5)
+    num_members = len(exploration_logs)
+    x_pos = np.arange(num_members)
     width = 0.35
     ax_events.bar(x_pos - width/2, exploit_counts, width, label='Exploit', color='#10B981', alpha=0.8)
     ax_events.bar(x_pos + width/2, explore_counts, width, label='Explore', color='#3B82F6', alpha=0.8)
@@ -482,33 +581,153 @@ def analyze_pbt_hyperparameters(data):
     ax_events.set_ylabel('Event Count', fontsize=10)
     ax_events.set_title('PBT Actions per Member', fontsize=11, fontweight='bold')
     ax_events.set_xticks(x_pos)
-    ax_events.set_xticklabels([f'M{i}' for i in range(5)])
+    ax_events.set_xticklabels([f'M{i}' for i in range(num_members)], fontsize=9)
     ax_events.legend(fontsize=9)
     ax_events.grid(True, alpha=0.2, axis='y', linestyle=':')
     
-    plt.suptitle('PBT Hyperparameter Evolution Across Population', fontsize=15, fontweight='bold', y=0.995)
-    plt.savefig(PLOT_DIR / "5_pbt_hyperparameter_evolution.png", bbox_inches='tight', dpi=300)
+    plt.suptitle('PBT Hyperparameter Analysis: Parameter Values vs Performance', fontsize=15, fontweight='bold', y=0.995)
+    plt.savefig(PLOT_DIR / "6_pbt_hyperparameter_evolution.png", bbox_inches='tight', dpi=300)
     plt.close()
 
 
-def generate_summary_report(data, pbt_stats, agent_stats, action_stats):
+def analyze_pbt_hyperparameter_frequency(data):
+    """Frequency distribution of hyperparameter values"""
+    pbt_members = data['pbt_rainbow_members']
+    
+    if not pbt_members:
+        print("Warning: No PBT Rainbow members found for hyperparameter frequency analysis")
+        return
+    
+    exploration_logs = []
+    for i in range(len(pbt_members)):
+        exp_file = PBT_RAINBOW_DIR / f"member_{i}" / "exploration_log.csv"
+        if exp_file.exists():
+            exploration_logs.append(pd.read_csv(exp_file))
+        else:
+            exploration_logs.append(None)
+    
+    key_params = ['learning_rate', 'gamma', 'batch_size', 'alpha', 'sigma']
+    
+    fig = plt.figure(figsize=(20, 10))
+    gs = fig.add_gridspec(2, 3, hspace=0.35, wspace=0.3)
+    
+    colors_pbt = ['#10B981', '#3B82F6', '#F59E0B', '#EF4444']
+    
+    for param_idx, param_name in enumerate(key_params):
+        if param_idx < 3:
+            row = 0
+            col = param_idx
+        else:
+            row = 1
+            col = param_idx - 3
+        ax = fig.add_subplot(gs[row, col])
+        
+        for member_idx, exp_log in enumerate(exploration_logs):
+            if exp_log is None:
+                continue
+            
+            # Get parameter changes over time
+            param_changes = exp_log[exp_log['param_name'] == param_name].copy()
+            
+            if len(param_changes) == 0:
+                continue
+            
+            # Calculate duration for each parameter value
+            param_values = []
+            durations = []
+            
+            for i in range(len(param_changes)):
+                current_episode = int(param_changes.iloc[i]['episode'])
+                current_value = float(param_changes.iloc[i]['new_value'])
+                
+                # Calculate duration until next change (or end of training)
+                if i < len(param_changes) - 1:
+                    next_episode = int(param_changes.iloc[i + 1]['episode'])
+                    duration = next_episode - current_episode
+                else:
+                    # Last value used until end of training (100k episodes)
+                    duration = 100000 - current_episode
+                
+                if param_name == 'batch_size':
+                    rounded_val = int(current_value)
+                elif param_name in ['learning_rate', 'sigma']:
+                    rounded_val = round(current_value, 6)
+                else:
+                    rounded_val = round(current_value, 4)
+                
+                param_values.append(rounded_val)
+                durations.append(duration)
+            
+            if len(param_values) > 0:
+                # Scatter plot: x=parameter value, y=duration (episodes)
+                ax.scatter(param_values, durations, 
+                          s=60,  # Fixed size for clarity
+                          alpha=0.7,
+                          label=f'M{member_idx}', 
+                          color=colors_pbt[member_idx])
+        
+        param_display = param_name.replace('_', ' ').title()
+        ax.set_xlabel(f'{param_display} Value', fontsize=10, fontweight='bold')
+        ax.set_ylabel('Duration (Episodes)', fontsize=10, fontweight='bold')
+        ax.set_title(f'Usage Duration: {param_display}', fontsize=11, fontweight='bold')
+        ax.legend(fontsize=8, loc='best')
+        ax.grid(True, alpha=0.3, linestyle=':')
+        
+        if param_name in ['learning_rate', 'gamma', 'sigma']:
+            ax.tick_params(axis='x', rotation=45)
+    
+    # Summary statistics in bottom right
+    ax_summary = fig.add_subplot(gs[1, 2])
+    ax_summary.axis('off')
+    
+    summary_text = "Hyperparameter Duration Analysis\n"
+    summary_text += "="*40 + "\n\n"
+    summary_text += "Shows how long each parameter\n"
+    summary_text += "value was used before changing.\n\n"
+    summary_text += "Y-axis: Duration (# of episodes)\n"
+    summary_text += "the value was kept.\n\n"
+    summary_text += "Higher points = parameter value\n"
+    summary_text += "was kept longer (successful!).\n\n"
+    summary_text += "Low points = quickly changed\n"
+    summary_text += "(likely underperforming).\n\n"
+    summary_text += "This reveals which parameter\n"
+    summary_text += "values PBT deemed most effective."
+    
+    ax_summary.text(0.1, 0.5, summary_text, fontsize=10, 
+                   verticalalignment='center', family='monospace',
+                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
+    
+    plt.suptitle('PBT: Hyperparameter Value Usage Duration', fontsize=15, fontweight='bold', y=0.995)
+    plt.savefig(PLOT_DIR / "6_pbt_hyperparameter_duration.png", bbox_inches='tight', dpi=300)
+    plt.close()
+    
+    print(f"\n✓ Saved: 6_pbt_hyperparameter_duration.png")
+
+
+def generate_summary_report(data, rainbow_pbt_stats, agent_stats, action_stats):
     report_path = PLOT_DIR / "comprehensive_analysis_report.txt"
     
     with open(report_path, 'w') as f:
         f.write("="*80 + "\n")
-        f.write("Reinforcement Learning Experiments: Rainbow DQN, PBT, DQN, and Random Agents\n")
+        f.write("Reinforcement Learning Experiments: Rainbow DQN, PBT Rainbow, DQN, and Random\n")
         f.write("="*80 + "\n\n")
         
-        # Section 1: PBT vs Baseline
-        f.write("1. PBT VS BASELINE RAINBOW\n")
+        # Section 1: Rainbow vs PBT Rainbow
+        f.write("1. RAINBOW DQN VS BEST PBT MEMBER\n")
         f.write("-"*80 + "\n")
-        if pbt_stats:
-            f.write(f"Baseline Rainbow Final Mean(100):  {pbt_stats['baseline_final_mean100']:.2f}\n")
-            f.write(f"PBT Population Final Mean(100):    {pbt_stats['pbt_final_mean100']:.2f}\n")
-            f.write(f"Baseline Average Return:            {pbt_stats['baseline_mean']:.2f}\n")
-            f.write(f"PBT Average Return:                 {pbt_stats['pbt_mean']:.2f}\n")
-            improvement = (pbt_stats['baseline_final_mean100'] / pbt_stats['pbt_final_mean100'] - 1) * 100
-            f.write(f"\nBaseline outperforms PBT by:        {improvement:.1f}%\n")
+        if rainbow_pbt_stats:
+            f.write(f"Rainbow DQN Mean(100):              {rainbow_pbt_stats['rainbow_final_mean100']:.2f}\n")
+            f.write(f"Best PBT Member Mean(100):          {rainbow_pbt_stats['best_pbt_final_mean100']:.2f}\n")
+            f.write(f"\nRainbow DQN Average Return:         {rainbow_pbt_stats['rainbow_mean']:.2f}\n")
+            f.write(f"Best PBT Average Return:            {rainbow_pbt_stats['best_pbt_mean']:.2f}\n")
+            
+            diff = rainbow_pbt_stats['rainbow_final_mean100'] - rainbow_pbt_stats['best_pbt_final_mean100']
+            if diff > 0:
+                f.write(f"\nRainbow DQN outperforms Best PBT by:    {diff:.2f} points\n")
+            else:
+                f.write(f"\nBest PBT outperforms Rainbow DQN by:    {abs(diff):.2f} points\n")
+            
+            f.write(f"Best PBT Member:                    Member {rainbow_pbt_stats['best_pbt_idx']}\n")
         f.write("\n")
         
         # Section 2: All Agents Comparison
@@ -523,15 +742,24 @@ def generate_summary_report(data, pbt_stats, agent_stats, action_stats):
             
             # Improvements
             f.write("\nRELATIVE IMPROVEMENTS:\n")
+            if 'pbt_rainbow' in agent_stats and 'rainbow' in agent_stats:
+                improvement = agent_stats['pbt_rainbow']['final_mean100'] / agent_stats['rainbow']['final_mean100']
+                f.write(f"  PBT Rainbow vs Rainbow DQN:    {improvement:.2f}x better\n")
             if 'rainbow' in agent_stats and 'random' in agent_stats:
                 improvement = agent_stats['rainbow']['final_mean100'] / agent_stats['random']['final_mean100']
-                f.write(f"  Rainbow vs Random:   {improvement:.2f}x better\n")
+                f.write(f"  Rainbow DQN vs Random:         {improvement:.2f}x better\n")
+            if 'pbt_rainbow' in agent_stats and 'random' in agent_stats:
+                improvement = agent_stats['pbt_rainbow']['final_mean100'] / agent_stats['random']['final_mean100']
+                f.write(f"  PBT Rainbow vs Random:         {improvement:.2f}x better\n")
             if 'dqn' in agent_stats and 'random' in agent_stats:
                 improvement = agent_stats['dqn']['final_mean100'] / agent_stats['random']['final_mean100']
-                f.write(f"  DQN vs Random:       {improvement:.2f}x better\n")
+                f.write(f"  DQN vs Random:                 {improvement:.2f}x better\n")
             if 'rainbow' in agent_stats and 'dqn' in agent_stats:
                 improvement = agent_stats['rainbow']['final_mean100'] / agent_stats['dqn']['final_mean100']
-                f.write(f"  Rainbow vs DQN:      {improvement:.2f}x better\n")
+                f.write(f"  Rainbow DQN vs DQN:            {improvement:.2f}x better\n")
+            if 'pbt_rainbow' in agent_stats and 'dqn' in agent_stats:
+                improvement = agent_stats['pbt_rainbow']['final_mean100'] / agent_stats['dqn']['final_mean100']
+                f.write(f"  PBT Rainbow vs DQN:            {improvement:.2f}x better\n")
         f.write("\n")
         
         # Section 3: Action Distributions
@@ -547,7 +775,7 @@ def generate_summary_report(data, pbt_stats, agent_stats, action_stats):
         f.write("\n")
     
     json_data = {
-        'pbt_comparison': pbt_stats,
+        'rainbow_vs_pbt_rainbow': rainbow_pbt_stats,
         'agent_statistics': agent_stats,
         'action_distributions': action_stats
     }
@@ -558,15 +786,18 @@ def generate_summary_report(data, pbt_stats, agent_stats, action_stats):
 
 def main():
     data = load_data()
-    pbt_stats = analyze_pbt_vs_baseline(data)
+    rainbow_pbt_stats = analyze_rainbow_vs_pbt_rainbow(data)
+    pbt_population_stats = analyze_pbt_population(data)
     agent_stats = analyze_all_agents(data)
     analyze_loss(data)
     action_stats = analyze_actions(data)
-    analyze_pbt_hyperparameters(data)
+    analyze_pbt_hyperparameter_frequency(data)  # Duration analysis only
     
-    generate_summary_report(data, pbt_stats, agent_stats, action_stats)
+    generate_summary_report(data, rainbow_pbt_stats, agent_stats, action_stats)
     
-    print(f"\nComplete. Saved to: {PLOT_DIR}")
+    print(f"\n{'='*80}")
+    print(f"Complete. Saved to: {PLOT_DIR}")
+    print(f"{'='*80}")
 
 
 if __name__ == "__main__":
