@@ -397,25 +397,52 @@ def analyze_all_agents(data):
 def analyze_loss(data):
     """Loss Analysis"""
     rainbow = data['final_rainbow']
+    pbt_members = data['pbt_rainbow_members']
+    
+    # Find best PBT member (M3)
+    best_pbt = None
+    best_pbt_idx = None
+    if pbt_members:
+        best_pbt_idx = max(range(len(pbt_members)), key=lambda i: pbt_members[i]['mean_return_100'].iloc[-1])
+        best_pbt = pbt_members[best_pbt_idx]
     
     fig, ax = plt.subplots(figsize=(14, 7))
     
+    window = 100
+    max_steps = None
+    
     if rainbow is not None and 'avg_loss' in rainbow.columns:
         rainbow_loss = rainbow[rainbow['avg_loss'] > 0].copy()
+        max_steps = rainbow_loss['total_steps'].iloc[-1]
         
-        window = 100
         rainbow_loss['loss_smooth'] = rolling_mean_for_plot(rainbow_loss['avg_loss'].values, window=window)
         
         ax.plot(rainbow_loss['total_steps'], rainbow_loss['avg_loss'].values,
-               color=COLORS['rainbow'], linewidth=0.5, alpha=0.2, label='Raw Loss')
+               color=COLORS['rainbow'], linewidth=0.5, alpha=0.2, label='Rainbow DQN Raw Loss')
         
         ax.plot(rainbow_loss['total_steps'], rainbow_loss['loss_smooth'],
                label=f'Rainbow DQN (Rolling Mean {window})', color=COLORS['rainbow'], 
                linewidth=2.5, alpha=0.9)
     
+    if best_pbt is not None and 'avg_loss' in best_pbt.columns:
+        pbt_loss = best_pbt[best_pbt['avg_loss'] > 0].copy()
+        
+        # Limit PBT to same max steps as Rainbow DQN
+        if max_steps is not None:
+            pbt_loss = pbt_loss[pbt_loss['total_steps'] <= max_steps].copy()
+        
+        pbt_loss['loss_smooth'] = rolling_mean_for_plot(pbt_loss['avg_loss'].values, window=window)
+        
+        ax.plot(pbt_loss['total_steps'], pbt_loss['avg_loss'].values,
+               color=COLORS['success'], linewidth=0.5, alpha=0.2, label=f'PBT M{best_pbt_idx} Raw Loss')
+        
+        ax.plot(pbt_loss['total_steps'], pbt_loss['loss_smooth'],
+               label=f'PBT Member M{best_pbt_idx} (Rolling Mean {window})', color=COLORS['success'], 
+               linewidth=2.5, alpha=0.9)
+    
     ax.set_xlabel('Total Steps', fontsize=13)
     ax.set_ylabel('Average Loss', fontsize=13)
-    ax.set_title('Rainbow DQN Training Loss', fontsize=14, fontweight='bold')
+    ax.set_title('Training Loss: Rainbow DQN vs PBT Rainbow', fontsize=14, fontweight='bold')
     ax.legend(fontsize=12)
     ax.grid(True, alpha=0.3)
     
