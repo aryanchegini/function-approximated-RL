@@ -238,22 +238,22 @@ def analyze_pbt_population(data):
     ax1.legend(fontsize=11, loc='best')
     ax1.grid(True, alpha=0.3, linestyle=':')
     
-    # Plot 2: Cumulative returns
+    # Plot 2: All 4 members' performance
     ax2 = axes[1]
     
-    best_cumulative = np.cumsum(best_pbt['episode_return'].iloc[:min_episodes_pbt].values)
-    avg_cumulative = np.cumsum(pbt_avg_episode_return.values)
+    member_colors = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444']  # Green, Blue, Orange, Red
     
-    ax2.plot(episodes, best_cumulative,
-            label=f'Best Member M{best_pbt_idx}',
-            color=COLORS['success'], linewidth=3, alpha=0.9)
-    ax2.plot(episodes, avg_cumulative,
-            label='Population Average',
-            color='#F59E0B', linewidth=3, alpha=0.9)
+    for idx, member in enumerate(pbt_members):
+        member_smooth = rolling_mean_for_plot(member['mean_return_100'].iloc[:min_episodes_pbt].values, window=50)
+        label_prefix = f'[Best] Member {idx}' if idx == best_pbt_idx else f'Member {idx}'
+        ax2.plot(episodes, member_smooth,
+                label=f'{label_prefix} (Mean(100)={member["mean_return_100"].iloc[:min_episodes_pbt].iloc[-1]:.2f})',
+                color=member_colors[idx], linewidth=2 if idx == best_pbt_idx else 1.5, 
+                alpha=0.9 if idx == best_pbt_idx else 0.8)
     
     ax2.set_xlabel('Episode', fontsize=13, fontweight='bold')
-    ax2.set_ylabel('Cumulative Return', fontsize=13, fontweight='bold')
-    ax2.set_title('Cumulative Performance', fontsize=14, fontweight='bold')
+    ax2.set_ylabel('Mean Return (100 episodes)', fontsize=13, fontweight='bold')
+    ax2.set_title('PBT: All Members Performance', fontsize=14, fontweight='bold')
     ax2.legend(fontsize=11, loc='best')
     ax2.grid(True, alpha=0.3, linestyle=':')
     
@@ -702,27 +702,6 @@ def analyze_pbt_hyperparameter_frequency(data):
         
         if param_name in ['learning_rate', 'gamma', 'sigma']:
             ax.tick_params(axis='x', rotation=45)
-    
-    # Summary statistics in bottom right
-    ax_summary = fig.add_subplot(gs[1, 2])
-    ax_summary.axis('off')
-    
-    summary_text = "Hyperparameter Duration Analysis\n"
-    summary_text += "="*40 + "\n\n"
-    summary_text += "Shows how long each parameter\n"
-    summary_text += "value was used before changing.\n\n"
-    summary_text += "Y-axis: Duration (# of episodes)\n"
-    summary_text += "the value was kept.\n\n"
-    summary_text += "Higher points = parameter value\n"
-    summary_text += "was kept longer (successful!).\n\n"
-    summary_text += "Low points = quickly changed\n"
-    summary_text += "(likely underperforming).\n\n"
-    summary_text += "This reveals which parameter\n"
-    summary_text += "values PBT deemed most effective."
-    
-    ax_summary.text(0.1, 0.5, summary_text, fontsize=10, 
-                   verticalalignment='center', family='monospace',
-                   bbox=dict(boxstyle='round', facecolor='wheat', alpha=0.3))
     
     plt.suptitle('PBT: Hyperparameter Value Usage Duration', fontsize=15, fontweight='bold', y=0.995)
     plt.savefig(PLOT_DIR / "6_pbt_hyperparameter_duration.png", bbox_inches='tight', dpi=300)
