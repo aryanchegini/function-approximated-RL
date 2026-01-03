@@ -89,7 +89,6 @@ class Member():
         self.config = copy.deepcopy(better_config)
         self.agent = RainbowDQN(self.config, self.device)
         self.agent.load_state_dict(better_params)
-        # self.replay_buffer = PrioritisedReplayBuffer(config_dict=BUFFER_CONFIG, alpha=self.config['alpha'], beta_start=self.config['beta_start'])
         self.n_step_buffer = NStepBuffer(n_step=self.config['n_step'], gamma=self.config['gamma'])
         self.replay_buffer.alpha = self.config['alpha']
         
@@ -128,9 +127,6 @@ class Member():
         state_dict = self.agent.state_dict()
         self.agent = RainbowDQN(self.config, self.device)
 
-        # for param_group in self.agent.optimizer.param_groups:
-        #     param_group['lr'] = self.config['learning_rate']
-
         self.n_step_buffer.gamma = self.config['gamma']
         self.agent.load_state_dict(state_dict)
         
@@ -141,3 +137,4 @@ class Member():
             old_config=old_config,
             new_config=self.config
         )
+

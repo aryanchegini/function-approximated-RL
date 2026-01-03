@@ -3,40 +3,31 @@ import torch
 import numpy as np
 import time
 from AtariWrapper import make_atari_env
-from RainbowAgent import RainbowDQN
+from agents.RainbowAgent import RainbowDQN
 from configs import ENV_CONFIG, AGENT_CONFIG, DEVICE
 
 
-def watch_agent(checkpoint_path, num_episodes=5, render_delay=0.02):
-    """
-    Args:
-        checkpoint_path: Path to the .pth checkpoint file
-        num_episodes: Number of episodes to watch
-        render_delay: Delay between frames (seconds) - lower = faster
-    """
-    
+def watch_agent(checkpoint_path, num_episodes=5, render_delay=0.02, difficulty=0, mode=0):
     # Load checkpoint first to get the config
     print(f"Loading checkpoint: {checkpoint_path}")
     checkpoint = torch.load(checkpoint_path, map_location=DEVICE)
-    
-    # Extract config from checkpoint (PBT saves agent config)
     if 'config' in checkpoint:
         agent_config = checkpoint['config']
         print(f"Using config from checkpoint (num_atoms={agent_config.get('num_atoms', 'N/A')})")
     else:
-        # Fallback: infer num_atoms from checkpoint structure
         print("Warning: No config found in checkpoint, inferring from model structure...")
         num_atoms = checkpoint['online_net']['2.atoms'].shape[0]
         print(f"Detected num_atoms={num_atoms} from checkpoint")
         
-        # Create config by copying AGENT_CONFIG and updating num_atoms
         agent_config = AGENT_CONFIG.copy()
         agent_config['num_atoms'] = num_atoms
-    
-    # Create environment with rendering enabled
+
+    print(f"Creating environment with difficulty={difficulty}, mode={mode}")
     env = make_atari_env(
         env_id=ENV_CONFIG['env_id'],
-        render_mode='human'  # This enables the visual display
+        render_mode='human',  # This enables the visual display
+        difficulty=difficulty,
+        mode=mode
     )
     
     # Create agent with checkpoint config
@@ -90,13 +81,24 @@ def watch_agent(checkpoint_path, num_episodes=5, render_delay=0.02):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print("Usage: python WatchAgent.py <checkpoint_path> [num_episodes] [render_delay]")
-        print("\nExample:")
+        print("Usage: python WatchAgent.py <checkpoint_path> [num_episodes] [render_delay] [difficulty] [mode]")
+        print("\nArguments:")
+        print("  checkpoint_path  : Path to the .pth/.pt checkpoint file")
+        print("  num_episodes     : Number of episodes to watch (default: 5)")
+        print("  render_delay     : Delay between frames in seconds (default: 0.02)")
+        print("  difficulty       : Atari difficulty level 0-1 (default: 0)")
+        print("  mode             : Atari game mode 0-15 (default: 0)")
+        print("\nExamples:")
         print("  python WatchAgent.py checkpoints/episode_100.pth")
+        print("  python WatchAgent.py checkpoints/best_model.pt 10")
+        print("  python WatchAgent.py checkpoints/best_model.pt 10 0.02 1 0  # Difficulty 1")
+        print("  python WatchAgent.py checkpoints/best_model.pt 10 0.02 0 2  # Mode 2")
         sys.exit(1)
     
     checkpoint_path = sys.argv[1]
     num_episodes = int(sys.argv[2]) if len(sys.argv) > 2 else 5
     render_delay = float(sys.argv[3]) if len(sys.argv) > 3 else 0.02
+    difficulty = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+    mode = int(sys.argv[5]) if len(sys.argv) > 5 else 0
     
-    watch_agent(checkpoint_path, num_episodes, render_delay)
+    watch_agent(checkpoint_path, num_episodes, render_delay, difficulty, mode)

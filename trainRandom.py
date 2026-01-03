@@ -43,7 +43,7 @@ def train():
     print(f"Logging to: {log_file}")
 
     for episode in range(1, num_episodes+1):
-        state, info = env.reset()
+        _, _ = env.reset()
 
         episode_reward = 0
         episode_steps = 0
@@ -52,14 +52,6 @@ def train():
             action = agent.get_action()
             observation, reward, terminated, truncated, _ = env.step(action)
             done = terminated or truncated
-
-            if terminated:
-                next_state = None
-            else:
-                next_state = observation
-                # next_state = torch.tensor(observation, dtype=torch.float32, device=device).unsqueeze(0)
-
-            state = next_state
 
             episode_reward += reward
             episode_actions.append(action)

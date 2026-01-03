@@ -180,12 +180,8 @@ class ScaledFloatFrame(gym.ObservationWrapper):
         return np.array(obs).astype(np.float32) / 255.0
 
 
-def make_atari_env(env_id: str, render_mode=None):
-    """
-    Creates Atari environment with preprocessing
-    render_mode: ('human', 'rgb_array', or None)
-    """
-    env = gym.make(env_id, render_mode=render_mode)
+def make_atari_env(env_id: str, render_mode=None, difficulty=0, mode=0):
+    env = gym.make(env_id, render_mode=render_mode, difficulty=difficulty, mode=mode)
 
     env = RandomStartEnv(env, noop_max=30)
     env = MaxAndSkipEnv(env, skip=4)

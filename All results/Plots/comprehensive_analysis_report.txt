@@ -1,0 +1,73 @@
+================================================================================
+Reinforcement Learning Experiments: Rainbow DQN, PBT Rainbow, DQN, and Random
+================================================================================
+
+1. RAINBOW DQN VS BEST PBT MEMBER
+--------------------------------------------------------------------------------
+Rainbow DQN Mean(100):              15.94
+Best PBT Member Mean(100):          23.49
+
+Rainbow DQN Average Return:         14.02
+Best PBT Average Return:            16.66
+
+Best PBT outperforms Rainbow DQN by:    7.55 points
+Best PBT Member:                    Member 3
+
+2. ALL AGENTS PERFORMANCE COMPARISON
+--------------------------------------------------------------------------------
+
+RAINBOW:
+  Final Mean(100):     15.94
+  Mean Return:         14.02 ± 12.97
+  Max Return:          93.00
+
+PBT_RAINBOW:
+  Final Mean(100):     23.49
+  Mean Return:         16.66 ± 16.21
+  Max Return:          115.00
+
+DQN:
+  Final Mean(100):     6.63
+  Mean Return:         5.79 ± 3.65
+  Max Return:          28.00
+
+RANDOM:
+  Final Mean(100):     3.52
+  Mean Return:         3.25 ± 3.25
+  Max Return:          29.00
+
+RELATIVE IMPROVEMENTS:
+  PBT Rainbow vs Rainbow DQN:    1.47x better
+  Rainbow DQN vs Random:         4.53x better
+  PBT Rainbow vs Random:         6.67x better
+  DQN vs Random:                 1.88x better
+  Rainbow DQN vs DQN:            2.40x better
+  PBT Rainbow vs DQN:            3.54x better
+
+3. ACTION DISTRIBUTION ANALYSIS
+--------------------------------------------------------------------------------
+
+Rainbow:
+  NOOP        : 12.82%
+  FIRE        : 29.83%
+  RIGHT       :  9.84%
+  LEFT        : 14.71%
+  RIGHTFIRE   : 19.04%
+  LEFTFIRE    : 13.76%
+
+DQN:
+  NOOP        :  2.66%
+  FIRE        : 20.63%
+  RIGHT       :  2.35%
+  LEFT        :  2.91%
+  RIGHTFIRE   : 51.45%
+  LEFTFIRE    : 20.00%
+
+Random:
+  NOOP        : 16.73%
+  FIRE        : 16.59%
+  RIGHT       : 16.68%
+  LEFT        : 16.69%
+  RIGHTFIRE   : 16.64%
+  LEFTFIRE    : 16.67%
+

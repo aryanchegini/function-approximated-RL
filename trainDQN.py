@@ -5,11 +5,14 @@ import os
 from datetime import datetime, timedelta
 import csv
 import numpy as np
+import time
+
 from configs.DQNSpaceInvadersConfig import (
     TRAINING_CONFIG,
     LOGGING_CONFIG,
     ENV_CONFIG
 )
+
 from collections import deque
 from scripts.evaluation import eval as evaluate_agent
 
@@ -59,7 +62,6 @@ def train():
     total_steps = 0
 
 
-    import time
     training_start_time = time.time()
 
     print(f"Starting training for {TRAINING_CONFIG['num_episodes']} episodes...")
@@ -70,11 +72,12 @@ def train():
     for episode in range(1, num_episodes+1):
         # Initialize the environment and get its state
         state, info = env.reset()
-        # state = torch.tensor(state, dtype=torch.float32, device=device).unsqueeze(0)
         state_tensor = torch.FloatTensor(state).permute(2, 0, 1).unsqueeze(0).to(device)
+
         episode_reward = 0
         episode_steps = 0
         episode_actions = []
+
         for _ in range(TRAINING_CONFIG['max_steps_per_episode']):
             action = agent.get_action(state_tensor)
             observation, reward, terminated, truncated, _ = env.step(action.item())
@@ -99,7 +102,7 @@ def train():
             # logging updates
             episode_reward += reward
             episode_actions.append(action)
-
+            episode_steps += 1
             
             if loss is not None:
                 batch_losses.append(loss.item() if isinstance(loss, torch.Tensor) else loss)
@@ -111,10 +114,10 @@ def train():
         # reward for 10 and 100 episodes
         rewards.append(episode_reward)
         rewards_10.append(episode_reward)
+        total_steps += episode_steps
 
         mean_return_10 = np.mean(list(rewards_10)[-10:]) if len(rewards_10) >= 10 else np.mean(rewards)
         mean_return_100 = np.mean(list(rewards)[-100:]) if len(rewards) >= 100 else np.mean(rewards)
-        # avg_loss = np.mean([loss.item() if isinstance(loss, torch.Tensor) else loss for loss in batch_losses]) if len(batch_losses) > 0 else 0
         try:
             avg_loss = np.mean(list(batch_losses)) if len(batch_losses) > 0 else 0
         except:
@@ -144,12 +147,11 @@ def train():
             
         if episode % TRAINING_CONFIG['eval_frequency'] == 0:
             eval_count += 1
-            eval_avg_reward, eval_actions, eval_rewards_eval, eval_states = evaluate_agent(
+            eval_avg_reward, _, _, _ = evaluate_agent(
                 env, agent, seed, 
                 num_episodes=TRAINING_CONFIG['eval_episodes'])
 
             print(f"\n Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {eval_avg_reward:.2f} \n")
-
             
             # Save best model
             if mean_return_100 > best_mean_reward:

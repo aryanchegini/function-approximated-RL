@@ -72,10 +72,10 @@ TRAINING_CONFIG = {
     'num_episodes': 100_000,  # Number of episodes to train estimate is 100 : 1, steps:episodes
     'max_steps_per_episode': 120_000,  # Maximum steps per episode
     'total_training_steps': 10_000_000,  # Total steps for entire training run
-    'learning_starts': 50_000,  # Start learning after this many steps
+    'learning_starts': 10, #50_000,  # Start learning after this many steps
     'train_frequency': 4,  # Train every N steps
-    'eval_frequency': 1000,  # Evaluate every N episodes
-    'eval_episodes': 250,  # Number of episodes for evaluation
+    'eval_frequency': 30,  # Evaluate every N episodes
+    'eval_episodes': 10,  # Number of episodes for evaluation
     'save_frequency': 5_000,  # Save checkpoint every N episodes
     'eval_seed': 50,  # Seed for evaluation environment
     'change_seed_every': 10  # Change evaluation seed every N evaluations
