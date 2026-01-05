@@ -1,7 +1,10 @@
 # function-approximated-RL
 
 # Install dependencies
+```bash
 pip install -r requirements.txt
+```
+
 
 # Usage guide:
 We recommend checking the config files to ensure file directories are appropriate for your device.
