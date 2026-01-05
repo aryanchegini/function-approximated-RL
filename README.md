@@ -7,7 +7,9 @@ pip install -r requirements.txt
 We recommend checking the config files to ensure file directories are appropriate for your device.
 
 train.py trains a rainbow DQN agent
+
 trainPBT.py trains a rainbow DQN agent (4 by default)
+
 trainDQN.py trains a standard DQN agent
 
 Use WatchAgent.py [checkpoint_path].pt to show a checkpoint playing
@@ -15,7 +17,9 @@ Use WatchAgent.py [checkpoint_path].pt to show a checkpoint playing
 All trainings currently run for 100_000 episodes (roughly 10M steps).
 
 # Papers this work is based on:
+
 Rainbow DQN: https://arxiv.org/abs/1710.02298
+
 Population Based Training: https://arxiv.org/abs/1711.09846
 
 # Here's a glimpse of our results:
