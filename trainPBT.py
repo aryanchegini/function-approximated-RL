@@ -1,32 +1,21 @@
 import sys
-from buffers import replay_buffer
 import torch
 import numpy as np
-from numpy.random import uniform, randint
+from numpy.random import randint
 from collections import deque
 import time
 from datetime import timedelta
-import os
-from RainbowAgent import RainbowDQN
-from AtariWrapper import make_atari_env
-from buffers.replay_buffer import PrioritisedReplayBuffer
-from buffers.n_step_buffer import NStepBuffer
+from wrappers.AtariWrapper import make_atari_env
 import copy
-# a change
 
 from configs.pbtConfigs.SpaceInvadersConfig import (
     ENV_CONFIG,
-    PBT_AGENTS_CONFIG_TYPE,
-    STABLE_AGENT_CONFIG,
-    BUFFER_CONFIG,
     TRAINING_CONFIG,
     LOGGING_CONFIG,
-    DEVICE,
     SEED,
     PBT_CONFIG,
-    PBT_AGENTS_CONFIG
 )
-from Members import Member
+from agents.Members import Member
 from logs.pbt_logger import GlobalCheckpointManager
 
 import multiprocessing as mp
@@ -206,7 +195,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
 
                 # Get action from agent and step environment
                 action = member.agent.get_action(state_tensor)
-                next_state, reward, terminated, truncated, info = env.step(action)
+                next_state, reward, terminated, truncated, _ = env.step(action)
 
                 done = terminated or truncated
                 episode_reward += reward
@@ -214,8 +203,10 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
                 metrics[i]['total_steps'] += 1
                 total_steps += 1
 
+                # add a step to the n step buffer
                 n_step_transition = member.n_step_buffer.add(state, action, reward, next_state, done)
                 
+                # add a step to the prioritized replay buffer
                 if n_step_transition:
                     s, a, r, s_next, d = n_step_transition
                     member.replay_buffer.add(s, a, r, s_next, d)
@@ -277,15 +268,7 @@ def training_thread(id, device, thread_population, shared_dict, devices, eval_da
             if episode % TRAINING_CONFIG['eval_frequency'] == 0 and total_steps > TRAINING_CONFIG['learning_starts']:
                 eval_data['eval_count'] += 1
 
-                shared_dict, rank, score = evaluate(
-                    env, 
-                    i, 
-                    member, 
-                    shared_dict, 
-                    eval_data, 
-                    episode, 
-                    total_steps
-                    )
+                shared_dict, rank, score = evaluate(env, i, member, shared_dict, eval_data, episode, total_steps)
 
                 print(f" Agent {member.id} Eval after {episode} episodes, {total_steps} steps: Average Reward over {TRAINING_CONFIG['eval_episodes']} episodes: {score:.2f}, seed:{eval_data['eval_seed']}")
 
@@ -392,7 +375,7 @@ if __name__=='__main__':
                 
                 process.start()
                 processes.append(process)
-
+            # Runs each process
             for i, p in enumerate(processes):
                 p.join()
                 print(f'Thread {i} terminated')

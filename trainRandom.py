@@ -1,4 +1,4 @@
-from AtariWrapper import make_atari_env
+from wrappers.AtariWrapper import make_atari_env
 import os
 from datetime import datetime, timedelta
 import csv

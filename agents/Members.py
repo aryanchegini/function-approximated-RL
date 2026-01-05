@@ -1,38 +1,22 @@
-
-
-from buffers import replay_buffer
-import torch
-import numpy as np
 from numpy.random import uniform, randint
-from collections import deque
-import time
-from datetime import timedelta
-import os
-import csv
-from RainbowAgent import RainbowDQN
-from AtariWrapper import make_atari_env
+
+from agents.RainbowAgent import RainbowDQN
 from buffers.replay_buffer import PrioritisedReplayBuffer
 from buffers.n_step_buffer import NStepBuffer
 import copy
 
 from configs.pbtConfigs.SpaceInvadersConfig import (
-    ENV_CONFIG,
     PBT_AGENTS_CONFIG_TYPE,
     STABLE_AGENT_CONFIG,
     BUFFER_CONFIG,
-    TRAINING_CONFIG,
     LOGGING_CONFIG,
     DEVICE,
-    SEED,
     PBT_CONFIG,
     PBT_AGENTS_CONFIG
 )
 
 from scripts.evaluation import eval as evaluate_agent
 from logs.pbt_logger import PBTLogger
-
-import multiprocessing as mp
-from torch.multiprocessing import Process, Queue, Manager
 
 
 chekcpoint_path = LOGGING_CONFIG['checkpoint_dir']

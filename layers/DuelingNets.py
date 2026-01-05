@@ -33,7 +33,7 @@ class DuelingNetwork(nn.Module):
         advantage = self.advantage_stream(x).view(batch_size, self.num_actions, self.num_atoms)  # Shape: (batch_size, num_actions, num_atoms)
         # Combine value and advantage to get Q-values
         q_dist = value + (advantage - advantage.mean(dim=1, keepdim=True))
-        q_dist = nn.functional.softmax(q_dist, dim=-1)  # Apply softmax to get probabilities
+        q_dist = nn.functional.softmax(q_dist, dim=-1)  # Apply softmax to get probabilities of reward at each action
 
         return q_dist
     
@@ -41,6 +41,7 @@ class DuelingNetwork(nn.Module):
         """Get Q-values by taking the expectation over the distribution."""
         
         q_values = (q_dist * self.atoms).sum(dim=-1)  # Shape: (batch_size, num_actions)
+        # this gives the expected utility of each action
         return q_values
     
     def reset_noise(self):

@@ -60,8 +60,8 @@ class RainbowDQN(nn.Module):
 
     def get_action(self, state):
         with torch.no_grad():
-            q = self.online(state)
-            q_values = (q * self.atoms.view(1, 1, -1)).sum(dim=-1)
+            q = self.online(state) # distibution of propability for each action-reward
+            q_values = (q * self.atoms.view(1, 1, -1)).sum(dim=-1) # utility of each action
             action = q_values.argmax(dim=1).item()
   
             return action
@@ -110,10 +110,7 @@ class RainbowDQN(nn.Module):
         # Select distribution for chosen actions
         actions_expanded = actions.unsqueeze(1).unsqueeze(1).expand(batch_size, 1, self.num_atoms)
         current_dist = current_dist.gather(1, actions_expanded).squeeze(1)
-        # 
-
-        # assert False, (f"Printing {current_dist.shape} and {actions_expanded.shape} and {actions.shape} and {batch_size} and {self.num_atoms}")
-
+        
         with torch.no_grad():
             # Double DQN: use online network to select actions
             next_q_dist = self.online(next_states)

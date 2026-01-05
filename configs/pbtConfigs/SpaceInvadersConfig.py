@@ -94,7 +94,7 @@ LOGGING_CONFIG = {
     'save_periodic_checkpoints': True,  # Save periodic checkpoints
     'num_checkpoints': 30,
     'checkpoint_by': 'episodes',  # 'steps' or 'episodes'
-    'console_every':20
+    'console_every':5
 }
 
 # Device settings - automatically use CPU if CUDA is not available

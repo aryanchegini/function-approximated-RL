@@ -1,6 +1,6 @@
 from agents.DQN import DQN
 import torch
-from AtariWrapper import make_atari_env
+from wrappers.AtariWrapper import make_atari_env
 import os
 from datetime import datetime, timedelta
 import csv
@@ -46,7 +46,6 @@ def train():
     os.makedirs(logs_path, exist_ok=True)
 
     log_file = os.path.join(logs_path, f'dqn_space_invaders_{timestamp}.csv')
-    eval_log_file = os.path.join(logs_path, f'evaluation_{timestamp}.csv')
 
     with open(log_file, 'w', newline='') as f:
         writer = csv.writer(f)
