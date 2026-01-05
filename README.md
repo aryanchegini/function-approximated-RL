@@ -7,7 +7,11 @@ pip install -r requirements.txt
 We recommend checking the config files to ensure file directories are appropriate for your device.
 
 train.py trains a rainbow DQN agent
+
 trainPBT.py trains a rainbow DQN agent (4 by default)
+
+ - This is very compuationally expensive, it's designed to run n//n_gpus on each thread, and a thread per gpu on your device (if initialised properly). We found 1-2 agents per thread is best but it will vary depending on your CPU and GPU specs. Best performance will be on a high thread CPU and a 3900 generation or higher NVIDIA GPU.
+
 trainDQN.py trains a standard DQN agent
 
 Use WatchAgent.py [checkpoint_path].pt to show a checkpoint playing
