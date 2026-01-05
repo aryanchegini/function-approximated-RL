@@ -1,7 +1,10 @@
 # function-approximated-RL
 
 # Install dependencies
+```bash
 pip install -r requirements.txt
+```
+
 
 # Usage guide:
 We recommend checking the config files to ensure file directories are appropriate for your device.
@@ -9,6 +12,7 @@ We recommend checking the config files to ensure file directories are appropriat
 train.py trains a rainbow DQN agent
 
 trainPBT.py trains a rainbow DQN agent (4 by default)
+
 
  - This is very compuationally expensive, it's designed to run n//n_gpus on each thread, and a thread per gpu on your device (if initialised properly). We found 1-2 agents per thread is best but it will vary depending on your CPU and GPU specs. Best performance will be on a high thread CPU and a 3900 generation or higher NVIDIA GPU.
 
@@ -19,7 +23,9 @@ Use WatchAgent.py [checkpoint_path].pt to show a checkpoint playing
 All trainings currently run for 100_000 episodes (roughly 10M steps).
 
 # Papers this work is based on:
+
 Rainbow DQN: https://arxiv.org/abs/1710.02298
+
 Population Based Training: https://arxiv.org/abs/1711.09846
 
 # Here's a glimpse of our results:
