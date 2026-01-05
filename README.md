@@ -28,6 +28,13 @@ Rainbow DQN: https://arxiv.org/abs/1710.02298
 
 Population Based Training: https://arxiv.org/abs/1711.09846
 
+# Producing the graphs
+Under the all results folder add the necessary CSV files for DQN, Rainbow and Random
+
+For PBT add the folder of each member under PBT Rainbow
+
+Run comprehensive_analysis.py to produce graphs of results which will come under Plots folder.
+
 # Here's a glimpse of our results:
 
 <p align="center">

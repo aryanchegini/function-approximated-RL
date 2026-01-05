@@ -241,7 +241,7 @@ def analyze_pbt_population(data):
     # Plot 2: All 4 members' performance
     ax2 = axes[1]
     
-    member_colors = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444']  # Green, Blue, Orange, Red
+    member_colors = ['#22C55E', '#3B82F6', '#F59E0B', '#EF4444']
     
     for idx, member in enumerate(pbt_members):
         member_smooth = rolling_mean_for_plot(member['mean_return_100'].iloc[:min_episodes_pbt].values, window=50)
@@ -688,7 +688,7 @@ def analyze_pbt_hyperparameter_frequency(data):
             if len(param_values) > 0:
                 # Scatter plot: x=parameter value, y=duration (episodes)
                 ax.scatter(param_values, durations, 
-                          s=60,  # Fixed size for clarity
+                          s=60,
                           alpha=0.7,
                           label=f'M{member_idx}', 
                           color=colors_pbt[member_idx])
